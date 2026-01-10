@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import SideBar from "./components/SideBar";
-import BaterPonto from "./components/BaterPonto";
+import BaterPonto from "./pages/BaterPonto";
 
 function App() {
   return (

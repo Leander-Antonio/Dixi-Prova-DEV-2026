@@ -1,9 +1,5 @@
 import { Link } from "react-router-dom";
-import {
-  UserIcon,
-  DocumentTextIcon,
-  ClockIcon,
-} from "@heroicons/react/24/outline";
+import { DocumentTextIcon, ClockIcon } from "@heroicons/react/24/outline";
 
 function SideBar() {
   return (
