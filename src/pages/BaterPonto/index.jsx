@@ -3,9 +3,12 @@ import { useState } from "react";
 import CameraPreview from "../../components/Camera";
 import Clock from "../../components/Clock";
 import ToggleCamera from "../../components/ToggleButton";
+import Previa from "../../components/Previa";
 
 function BaterPonto() {
   const [ativo, setAtivo] = useState(false);
+  const [foto, setFoto] = useState(null);
+  const [mostrarPrevia, setMostrarPrevia] = useState(false);
 
   return (
     <div className="min-h-screen flex justify-center font-sans">
@@ -19,7 +22,13 @@ function BaterPonto() {
         </h2>
         {/* Camera*/}
         <div className="h-[650px] bg-white rounded-2xl shadow-md flex overflow-hidden">
-          <CameraPreview ativo={ativo} />
+          <CameraPreview
+            ativo={ativo}
+            onCapture={(imagem) => {
+              setFoto(imagem);
+              setMostrarPrevia(true);
+            }}
+          />
           {/* parte das infos */}
           <div className="w-[500px] p-6 flex flex-col justify-between">
             <div>
@@ -31,13 +40,34 @@ function BaterPonto() {
               <ToggleCamera ativo={ativo} onToggle={() => setAtivo(!ativo)} />
             </div>
             {/* botão registrar */}
-            <button className="bg-[#3379BC] text-white font-semibold py-3 rounded-lg flex items-center justify-center gap-2">
+            <button
+              onClick={() => {
+                // dispara a captura da foto
+                document.getElementById("capturar-foto")?.click();
+              }}
+              className="bg-[#3379BC] text-white font-semibold py-3 rounded-lg hover:bg-[#40A5DD] transition flex items-center justify-center gap-2"
+            >
               <ClockIcon className="h-7 stroke-2" />
               Registrar Ponto
             </button>
           </div>
         </div>
       </div>
+      {mostrarPrevia && (
+        <Previa
+          foto={foto}
+          onFechar={() => setMostrarPrevia(false)}
+          onRefazer={() => {
+            setFoto(null);
+            setMostrarPrevia(false);
+          }}
+          onConfirmar={() => {
+            console.log("Ponto registrado!");
+            setMostrarPrevia(false);
+            setFoto(null);
+          }}
+        />
+      )}
     </div>
   );
 }

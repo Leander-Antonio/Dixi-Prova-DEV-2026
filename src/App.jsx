@@ -6,14 +6,16 @@ import BaterPonto from "./pages/BaterPonto";
 function App() {
   return (
     <BrowserRouter>
-      <SideBar />
+      <div className="font-sans">
+        <SideBar />
 
-      {/* Conteúdo das páginas */}
-      <div className="ml-[120px] min-h-screen bg-white p-6">
-        <Routes>
-          <Route path="/" element={<BaterPonto />} />
-          <Route path="/bater-ponto" element={<BaterPonto />} />
-        </Routes>
+        {/* Conteúdo das páginas */}
+        <div className="ml-[120px] min-h-screen bg-white p-6">
+          <Routes>
+            <Route path="/" element={<BaterPonto />} />
+            <Route path="/bater-ponto" element={<BaterPonto />} />
+          </Routes>
+        </div>
       </div>
     </BrowserRouter>
   );

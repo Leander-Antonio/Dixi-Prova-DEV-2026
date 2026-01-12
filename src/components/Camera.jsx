@@ -1,10 +1,11 @@
 import { VideoCameraSlashIcon } from "@heroicons/react/24/outline";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
-function Camera({ ativo }) {
+function Camera({ ativo, onCapture }) {
   const [cameraAtiva, setCameraAtiva] = useState(false);
   const [erroCamera, setErroCamera] = useState(false);
   const [stream, setStream] = useState(null);
+  const videoRef = useRef(null);
 
   const ativarCamera = async () => {
     try {
@@ -40,6 +41,13 @@ function Camera({ ativo }) {
     }
   }, [ativo]);
 
+  // conecta stream ao video
+  useEffect(() => {
+    if (videoRef.current && stream) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [stream]);
+
   // cleanup
   useEffect(() => {
     return () => {
@@ -49,15 +57,30 @@ function Camera({ ativo }) {
     };
   }, [stream]);
 
+  // foto
+  const capturarFoto = () => {
+    if (!videoRef.current) return;
+
+    const video = videoRef.current;
+    const canvas = document.createElement("canvas");
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const imagem = canvas.toDataURL("image/jpeg");
+    onCapture(imagem);
+  };
+
   return (
     <div className="flex-1 relative bg-gray-50 flex items-center justify-center overflow-hidden">
       {cameraAtiva && stream && (
         <video
+          ref={videoRef}
           autoPlay
           playsInline
-          ref={(video) => {
-            if (video) video.srcObject = stream;
-          }}
           className="w-full h-full object-cover"
         />
       )}
@@ -113,6 +136,7 @@ function Camera({ ativo }) {
       {!cameraAtiva && !erroCamera && (
         <span className="text-gray-400 text-sm">Foto Desabilitada</span>
       )}
+      <button id="capturar-foto" onClick={capturarFoto} className="hidden" />
     </div>
   );
 }
