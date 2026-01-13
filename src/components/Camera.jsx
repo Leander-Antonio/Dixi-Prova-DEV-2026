@@ -1,7 +1,7 @@
 import { VideoCameraSlashIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState, useRef } from "react";
 
-function Camera({ ativo, onCapture }) {
+function Camera({ ativo, onCapture, onPermissaoNegada }) {
   const [cameraAtiva, setCameraAtiva] = useState(false);
   const [erroCamera, setErroCamera] = useState(false);
   const [stream, setStream] = useState(null);
@@ -20,6 +20,7 @@ function Camera({ ativo, onCapture }) {
       console.error("Erro câmera:", error.name);
       setErroCamera(true);
       setCameraAtiva(false);
+      onPermissaoNegada?.();
     }
   };
 

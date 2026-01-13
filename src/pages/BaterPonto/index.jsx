@@ -9,6 +9,9 @@ function BaterPonto() {
   const [ativo, setAtivo] = useState(false);
   const [foto, setFoto] = useState(null);
   const [mostrarPrevia, setMostrarPrevia] = useState(false);
+  const [momentoMarcacao, setMomentoMarcacao] = useState(null);
+  const [permissaoCameraNegada, setPermissaoCameraNegada] = useState(false);
+  const podeRegistrar = !ativo || (ativo && !permissaoCameraNegada);
 
   return (
     <div className="min-h-screen flex justify-center font-sans">
@@ -26,7 +29,11 @@ function BaterPonto() {
             ativo={ativo}
             onCapture={(imagem) => {
               setFoto(imagem);
+              setMomentoMarcacao(new Date());
               setMostrarPrevia(true);
+            }}
+            onPermissaoNegada={() => {
+              setPermissaoCameraNegada(true);
             }}
           />
           {/* parte das infos */}
@@ -37,15 +44,35 @@ function BaterPonto() {
                 A data e hora serão registrados no sistema ao realizar a
                 marcação.
               </p>
-              <ToggleCamera ativo={ativo} onToggle={() => setAtivo(!ativo)} />
+              <ToggleCamera
+                ativo={ativo}
+                onToggle={() => {
+                  setAtivo(!ativo);
+                  setPermissaoCameraNegada(false);
+                }}
+              />
             </div>
             {/* botão registrar */}
             <button
+              disabled={!podeRegistrar}
               onClick={() => {
-                // dispara a captura da foto
-                document.getElementById("capturar-foto")?.click();
+                if (!ativo) {
+                  // registro sem foto
+                  setFoto(null);
+                  setMomentoMarcacao(new Date());
+                  setMostrarPrevia(true);
+                } else {
+                  // registro com foto
+                  document.getElementById("capturar-foto")?.click();
+                }
               }}
-              className="bg-[#3379BC] text-white font-semibold py-3 rounded-lg hover:bg-[#40A5DD] transition flex items-center justify-center gap-2"
+              className={`font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2
+    ${
+      podeRegistrar
+        ? "bg-[#3379BC] text-white hover:bg-[#40A5DD]"
+        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+    }
+  `}
             >
               <ClockIcon className="h-7 stroke-2" />
               Registrar Ponto
@@ -56,15 +83,18 @@ function BaterPonto() {
       {mostrarPrevia && (
         <Previa
           foto={foto}
+          momento={momentoMarcacao}
           onFechar={() => setMostrarPrevia(false)}
           onRefazer={() => {
             setFoto(null);
+            setMomentoMarcacao(null); // 👈 importante
             setMostrarPrevia(false);
           }}
           onConfirmar={() => {
             console.log("Ponto registrado!");
             setMostrarPrevia(false);
             setFoto(null);
+            setMomentoMarcacao(null);
           }}
         />
       )}

@@ -1,11 +1,13 @@
+import ClockStatic from "./ClockStatic";
+
 import {
   XMarkIcon,
   ArrowPathIcon,
   CheckIcon,
 } from "@heroicons/react/24/outline";
 
-function Previa({ foto, onFechar, onRefazer, onConfirmar }) {
-  if (!foto) return null;
+function Previa({ foto, momento, onFechar, onRefazer, onConfirmar }) {
+  if (!momento) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -27,15 +29,27 @@ function Previa({ foto, onFechar, onRefazer, onConfirmar }) {
         <div className="flex flex-1 px-6 py-4">
           {/* foto */}
           <div className="w-1/2 flex items-center justify-center">
-            <img
-              src={foto}
-              alt="Prévia"
-              className="rounded-xl object-cover w-full h-full"
-            />
+            {foto ? (
+              <img
+                src={foto}
+                alt="Prévia"
+                className="rounded-xl object-cover w-full h-full"
+              />
+            ) : (
+              <p className="text-gray-400 text-lg font-semibold">
+                Registro sem foto
+              </p>
+            )}
           </div>
 
           {/* texto infos */}
-          <div className="w-1/2 flex items-center justify-center">
+          <div className="w-1/2 flex flex-col items-center justify-center gap-6">
+            {/* data e hora da marcação */}
+            <div className="text-center">
+              <ClockStatic data={momento} />
+            </div>
+
+            {/* pergunta */}
             <p className="text-gray-600 text-lg font-semibold text-center">
               Você deseja registrar esse ponto?
             </p>
