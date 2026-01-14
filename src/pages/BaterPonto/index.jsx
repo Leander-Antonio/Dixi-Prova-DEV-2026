@@ -66,7 +66,7 @@ function BaterPonto() {
                   document.getElementById("capturar-foto")?.click();
                 }
               }}
-              className={`font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2
+              className={`font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2 cursor-pointer
     ${
       podeRegistrar
         ? "bg-[#3379BC] text-white hover:bg-[#40A5DD]"

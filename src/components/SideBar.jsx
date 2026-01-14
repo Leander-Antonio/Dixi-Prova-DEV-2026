@@ -22,11 +22,12 @@ function SideBar() {
       <div className="w-full h-px bg-white my-4 "></div>
 
       <Link
-        to="/espelho"
+        to="/historico-ponto"
         className="text-white flex flex-col items-center justify-center font-semibold h-[100px] w-full hover:bg-[#2a66a3]"
       >
         <DocumentTextIcon className="h-8 w-8 text-white stroke-2 mb-1" />
-        <span>Histórico</span> <span>de Ponto</span>
+        <span>Histórico</span>
+        <span>de Ponto</span>
       </Link>
 
       <div className="w-full h-px bg-white my-4 "></div>

@@ -127,7 +127,7 @@ function Camera({ ativo, onCapture, onPermissaoNegada }) {
 
           <button
             onClick={ativarCamera}
-            className="border border-[#3379BC] text-[#3379BC] px-5 py-2 rounded-full font-semibold hover:bg-[#3379BC] hover:text-white transition"
+            className="border border-[#3379BC] text-[#3379BC] px-5 py-2 rounded-full font-semibold hover:bg-[#3379BC] hover:text-white transition cursor-pointer"
           >
             Ative a Permissão
           </button>

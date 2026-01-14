@@ -1,7 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import SideBar from "./components/SideBar";
-import BaterPonto from "./pages/BaterPonto";
+import BaterPonto from "./pages/BaterPonto/index";
+import HistoricoPonto from "./pages/HistoricoPonto/HistoricoPonto";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Routes>
             <Route path="/" element={<BaterPonto />} />
             <Route path="/bater-ponto" element={<BaterPonto />} />
+            <Route path="/historico-ponto" element={<HistoricoPonto />} />
           </Routes>
         </div>
       </div>

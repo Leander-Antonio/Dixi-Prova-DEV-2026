@@ -4,7 +4,7 @@ function ToggleBotton({ ativo, onToggle }) {
       <button
         type="button"
         onClick={onToggle}
-        className={`relative w-15 h-7 flex items-center rounded-full p-1 transition-colors ${
+        className={`relative w-15 h-7 flex items-center rounded-full p-1 transition-colors cursor-pointer ${
           ativo ? "bg-[#3379BC]" : "bg-white border-2 border-[#3379BC]"
         }`}
       >

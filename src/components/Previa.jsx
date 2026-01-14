@@ -15,9 +15,9 @@ function Previa({ foto, momento, onFechar, onRefazer, onConfirmar }) {
         {/* botão fechar */}
         <button
           onClick={onFechar}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+          className="absolute border-3 border-[#3379BC] rounded-md top-4 right-4 text-[#3379BC] hover:bg-[#3379BC] hover:text-white cursor-pointer"
         >
-          <XMarkIcon className="w-6 h-6" />
+          <XMarkIcon className="w-6 h-6 stroke-2" />
         </button>
 
         {/* título */}
@@ -60,7 +60,7 @@ function Previa({ foto, momento, onFechar, onRefazer, onConfirmar }) {
         <div className="ml-6 mr-6 mb-6 mt-2 flex gap-4">
           <button
             onClick={onRefazer}
-            className="flex-1 border border-[#3379BC] text-[#3379BC] py-2 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-[#3379BC] hover:text-white transition"
+            className="flex-1 border border-[#3379BC] text-[#3379BC] py-2 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-[#3379BC] hover:text-white transition cursor-pointer"
           >
             <ArrowPathIcon className="w-5 h-5 stroke-2" />
             Tirar outra foto
@@ -68,7 +68,7 @@ function Previa({ foto, momento, onFechar, onRefazer, onConfirmar }) {
 
           <button
             onClick={onConfirmar}
-            className="flex-1 bg-[#3379BC] text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-[#40A5DD] transition"
+            className="flex-1 bg-[#3379BC] text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-[#40A5DD] transition cursor-pointer"
           >
             <CheckIcon className="w-5 h-5 stroke-3" />
             Registrar Ponto
