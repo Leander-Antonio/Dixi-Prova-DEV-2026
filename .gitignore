@@ -1,4 +1,6 @@
+# ======================
 # Logs
+# ======================
 logs
 *.log
 npm-debug.log*
@@ -7,15 +9,33 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# ======================
+# Frontend (Node / Vite)
+# ======================
 node_modules
 dist
 dist-ssr
 *.local
 
-# Editor directories and files
+# ======================
+# Backend (Java / Spring Boot)
+# ======================
+target/
+build/
+.gradle/
+
+# Spring config local
+application-*.properties
+
+# ======================
+# IDEs and OS
+# ======================
 .vscode/*
 !.vscode/extensions.json
 .idea
+.settings/
+.classpath
+.project
 .DS_Store
 *.suo
 *.ntvs*
