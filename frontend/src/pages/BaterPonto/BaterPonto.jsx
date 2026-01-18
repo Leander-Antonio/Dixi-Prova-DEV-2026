@@ -4,6 +4,7 @@ import CameraPreview from "../../components/Camera";
 import Clock from "../../components/Clock";
 import ToggleCamera from "../../components/ToggleButton";
 import Previa from "../../components/Previa";
+import api from "../../services/api";
 
 function BaterPonto() {
   const [ativo, setAtivo] = useState(false);
@@ -12,6 +13,20 @@ function BaterPonto() {
   const [momentoMarcacao, setMomentoMarcacao] = useState(null);
   const [permissaoCameraNegada, setPermissaoCameraNegada] = useState(false);
   const podeRegistrar = !ativo || (ativo && !permissaoCameraNegada);
+
+  const toLocalDateTimeString = (date) => {
+    const pad = (n) => String(n).padStart(2, "0");
+
+    const yyyy = date.getFullYear();
+    const MM = pad(date.getMonth() + 1);
+    const dd = pad(date.getDate());
+
+    const HH = pad(date.getHours());
+    const mm = pad(date.getMinutes());
+    const ss = pad(date.getSeconds());
+
+    return `${yyyy}-${MM}-${dd}T${HH}:${mm}:${ss}`;
+  };
 
   return (
     <div className="min-h-screen flex justify-center font-sans">
@@ -87,14 +102,23 @@ function BaterPonto() {
           onFechar={() => setMostrarPrevia(false)}
           onRefazer={() => {
             setFoto(null);
-            setMomentoMarcacao(null); // 👈 importante
+            setMomentoMarcacao(null);
             setMostrarPrevia(false);
           }}
-          onConfirmar={() => {
-            console.log("Ponto registrado!");
-            setMostrarPrevia(false);
-            setFoto(null);
-            setMomentoMarcacao(null);
+          onConfirmar={async () => {
+            try {
+              await api.post("/pontos", {
+                momento: toLocalDateTimeString(momentoMarcacao),
+                fotoBase: foto,
+              });
+
+              setMostrarPrevia(false);
+              setFoto(null);
+              setMomentoMarcacao(null);
+            } catch (e) {
+              console.error(e);
+              alert("Erro ao registrar ponto");
+            }
           }}
         />
       )}

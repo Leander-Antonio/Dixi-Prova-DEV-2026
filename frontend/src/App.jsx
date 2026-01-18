@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import SideBar from "./components/SideBar";
-import BaterPonto from "./pages/BaterPonto/index";
+import BaterPonto from "./pages/BaterPonto/BaterPonto";
 import HistoricoPonto from "./pages/HistoricoPonto/HistoricoPonto";
 import Usuarios from "./pages/Usuarios";
 

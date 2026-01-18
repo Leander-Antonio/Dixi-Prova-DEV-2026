@@ -1,10 +1,41 @@
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
+import api from "../../services/api";
 import { useEffect, useState } from "react";
 
 function HistoricoPonto() {
   const navigate = useNavigate();
+  const [linhas, setLinhas] = useState([]);
+
+  const buscar = async () => {
+    const inicio = "2026-01-01";
+    const fim = "2026-01-31";
+
+    const res = await api.get("/pontos/historico", { params: { inicio, fim } });
+    setLinhas(res.data);
+    setCalculado(false);
+  };
+
+  const [calculado, setCalculado] = useState(false);
+
+  const calcular = async () => {
+    const inicio = "2026-01-01";
+    const fim = "2026-01-31";
+
+    const res = await api.get("/pontos/historico/calcular", {
+      params: { inicio, fim },
+    });
+    setLinhas(res.data);
+    setCalculado(true);
+  };
+
+  const formatarDataBR = (dataISO) => {
+    if (!dataISO) return "";
+
+    const [ano, mes, dia] = dataISO.split("-");
+    return `${dia}/${mes}/${ano}`;
+  };
 
   return (
     <div className="w-full ml-20 mt-10">
@@ -45,20 +76,37 @@ function HistoricoPonto() {
           </div>
 
           {/* BOTÕES */}
-          <button
-            className="w-[180px] h-9 shadow rounded border border-[#3379BC]
-              text-[#3379BC] font-semibold text-[18px]
-              flex items-center justify-center gap-2
-              hover:bg-[#3379BC] hover:text-white transition cursor-pointer"
-          >
-            <PlusIcon className="h-6 w-6" />
-            Calcular
-          </button>
+          <div className="relative group">
+            <button
+              type="button"
+              onClick={calcular}
+              className="w-[180px] h-9 shadow rounded border border-[#3379BC]
+      text-[#3379BC] font-semibold text-[18px]
+      flex items-center justify-center gap-2
+      hover:bg-[#3379BC] hover:text-white transition cursor-pointer"
+            >
+              <PlusIcon className="h-6 w-6" />
+              Calcular
+            </button>
+
+            {/* Tooltip */}
+            <div
+              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2
+      hidden group-hover:block
+      bg-gray-400 text-white text-sm px-3 py-2 rounded-md
+      whitespace-nowrap z-50"
+            >
+              Para o cálculo ser correto, é necessário ter um número <b>par</b>{" "}
+              de marcações.
+            </div>
+          </div>
 
           <div className="flex gap-4">
             <button
+              type="button"
+              onClick={buscar}
               className="bg-[#3379BC] w-[180px] h-9 shadow rounded
-              text-white font-semibold text-[18px] flex items-center justify-center gap-2 hover:bg-[#40A5DD] cursor-pointer"
+    text-white font-semibold text-[18px] flex items-center justify-center gap-2 hover:bg-[#40A5DD] cursor-pointer"
             >
               <MagnifyingGlassIcon className="h-6 w-6 stroke-2" />
               Pesquisar
@@ -84,17 +132,19 @@ function HistoricoPonto() {
             </thead>
 
             <tbody>
-              <tr className="text-center font-semibold">
-                <td className="py-3 p-2 border-t border-gray-300">
-                  05/01/2025
-                </td>
-                <td className="py-3 p-2 border-t border-gray-300 border-l">
-                  08:00 • 12:00 • 13:00 • 17:00
-                </td>
-                <td className="py-3 p-2 border-t border-gray-300 border-l">
-                  8h
-                </td>
-              </tr>
+              {linhas.map((linha) => (
+                <tr key={linha.data} className="text-center font-semibold">
+                  <td className="py-3 p-2 border-t border-gray-300">
+                    {formatarDataBR(linha.data)}
+                  </td>
+                  <td className="py-3 p-2 border-t border-gray-300 border-l">
+                    {linha.marcacoes.join("\u00A0\u00A0\u00A0\u00A0\u00A0")}
+                  </td>
+                  <td className="py-3 p-2 border-t border-gray-300 border-l">
+                    {linha.horasTrabalhadas ?? "-"}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
