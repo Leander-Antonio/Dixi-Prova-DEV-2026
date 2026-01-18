@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SideBar from "./components/SideBar";
 import BaterPonto from "./pages/BaterPonto/BaterPonto";
 import HistoricoPonto from "./pages/HistoricoPonto/HistoricoPonto";
-import Usuarios from "./pages/Usuarios";
 
 function App() {
   return (
@@ -14,8 +13,6 @@ function App() {
         {/* Conteúdo das páginas */}
         <div className="ml-[120px] min-h-screen bg-white p-6">
           <Routes>
-            <Route path="/usuarios" element={<Usuarios />} />
-
             <Route path="/" element={<BaterPonto />} />
             <Route path="/bater-ponto" element={<BaterPonto />} />
             <Route path="/historico-ponto" element={<HistoricoPonto />} />

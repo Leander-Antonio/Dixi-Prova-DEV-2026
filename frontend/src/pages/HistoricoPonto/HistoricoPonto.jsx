@@ -3,10 +3,12 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import { useEffect, useState } from "react";
+import DadosMarcacao from "../../components/DadosMarcacao";
 
 function HistoricoPonto() {
   const navigate = useNavigate();
   const [linhas, setLinhas] = useState([]);
+  const [marcacaoSelecionada, setMarcacaoSelecionada] = useState(null);
 
   const buscar = async () => {
     const inicio = "2026-01-01";
@@ -133,14 +135,27 @@ function HistoricoPonto() {
 
             <tbody>
               {linhas.map((linha) => (
-                <tr key={linha.data} className="text-center font-semibold">
-                  <td className="py-3 p-2 border-t border-gray-300">
+                <tr key={linha.data} className=" font-semibold">
+                  <td className="py-3 p-2 border-t border-gray-300 text-center">
                     {formatarDataBR(linha.data)}
                   </td>
-                  <td className="py-3 p-2 border-t border-gray-300 border-l">
-                    {linha.marcacoes.join("\u00A0\u00A0\u00A0\u00A0\u00A0")}
+                  <td className="py-3 pl-6 border-t border-gray-300 border-l text-left">
+                    <div className="flex flex-wrap gap-2">
+                      {linha.marcacoes.map((m, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setMarcacaoSelecionada({ momento: m })}
+                          className="px-3 py-1 rounded-lg border border-[#3379BC] text-[#3379BC] font-semibold
+                   hover:bg-[#3379BC] hover:text-white transition cursor-pointer"
+                        >
+                          {m}
+                        </button>
+                      ))}
+                    </div>
                   </td>
-                  <td className="py-3 p-2 border-t border-gray-300 border-l">
+
+                  <td className="py-3 p-2 border-t border-gray-300 border-l text-center">
                     {linha.horasTrabalhadas ?? "-"}
                   </td>
                 </tr>
@@ -149,6 +164,11 @@ function HistoricoPonto() {
           </table>
         </div>
       </div>
+      <DadosMarcacao
+        foto={marcacaoSelecionada?.foto}
+        momento={marcacaoSelecionada?.momento}
+        onFechar={() => setMarcacaoSelecionada(null)}
+      />
     </div>
   );
 }
