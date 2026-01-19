@@ -1,13 +1,21 @@
 import ClockStatic from "./ClockStatic";
-import { XMarkIcon, VideoCameraSlashIcon } from "@heroicons/react/24/outline";
+import {
+  XMarkIcon,
+  VideoCameraSlashIcon,
+  MapPinIcon,
+} from "@heroicons/react/24/outline";
 
-function DadosMarcacao({ foto, momento, onFechar }) {
+function DadosMarcacao({ foto, momento, localizacao, onFechar }) {
   if (!momento) return null;
+
+  const textoLocalizacao =
+    localizacao?.latitude && localizacao?.longitude
+      ? `${localizacao.latitude.toFixed(6)}, ${localizacao.longitude.toFixed(6)}`
+      : null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-white rounded-2xl w-[900px] h-[480px] flex flex-col relative overflow-hidden">
-        {/* botão fechar */}
         <button
           onClick={onFechar}
           className="absolute border-3 border-[#3379BC] rounded-md top-4 right-4 text-[#3379BC] hover:bg-[#3379BC] hover:text-white cursor-pointer"
@@ -15,14 +23,11 @@ function DadosMarcacao({ foto, momento, onFechar }) {
           <XMarkIcon className="w-6 h-6 stroke-2" />
         </button>
 
-        {/* título */}
         <h2 className="text-2xl font-bold text-[#3379BC] mt-4 ml-8">
           Dados da Marcação
         </h2>
 
-        {/* conteúdo principal */}
         <div className="flex flex-1 px-6 py-4">
-          {/* foto */}
           <div className="w-1/2 flex items-center justify-center">
             {foto ? (
               <img
@@ -38,10 +43,23 @@ function DadosMarcacao({ foto, momento, onFechar }) {
             )}
           </div>
 
-          {/* infos */}
           <div className="w-1/2 flex flex-col items-center justify-center gap-6">
             <div className="text-center">
               <ClockStatic data={momento} />
+            </div>
+
+            {/* localização */}
+            <div className="flex items-center gap-2">
+              <MapPinIcon className="w-6 h-6 text-[#3379BC] stroke-2" />
+              {textoLocalizacao ? (
+                <p className="text-gray-700 font-semibold">
+                  {textoLocalizacao}
+                </p>
+              ) : (
+                <p className="text-gray-400 font-semibold">
+                  Localização não informada
+                </p>
+              )}
             </div>
 
             <p className="text-gray-600 text-lg font-semibold text-center">

@@ -13,6 +13,9 @@ function BaterPonto() {
   const [momentoMarcacao, setMomentoMarcacao] = useState(null);
   const [permissaoCameraNegada, setPermissaoCameraNegada] = useState(false);
   const podeRegistrar = !ativo || (ativo && !permissaoCameraNegada);
+  const [localizacao, setLocalizacao] = useState(null);
+  const [carregandoLocalizacao, setCarregandoLocalizacao] = useState(false);
+  const [localizacaoNegada, setLocalizacaoNegada] = useState(false);
 
   const toLocalDateTimeString = (date) => {
     const pad = (n) => String(n).padStart(2, "0");
@@ -26,6 +29,44 @@ function BaterPonto() {
     const ss = pad(date.getSeconds());
 
     return `${yyyy}-${MM}-${dd}T${HH}:${mm}:${ss}`;
+  };
+
+  const obterLocalizacao = () => {
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) {
+        resolve({ ok: false, denied: false, loc: null });
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) =>
+          resolve({
+            ok: true,
+            denied: false,
+            loc: {
+              latitude: pos.coords.latitude,
+              longitude: pos.coords.longitude,
+            },
+          }),
+        (err) => {
+          const denied = err?.code === 1; // PERMISSION_DENIED
+          resolve({ ok: false, denied, loc: null });
+        },
+        { enableHighAccuracy: true, timeout: 8000 },
+      );
+    });
+  };
+
+  const solicitarLocalizacao = async () => {
+    setCarregandoLocalizacao(true);
+
+    try {
+      const res = await obterLocalizacao();
+      setLocalizacao(res.loc);
+      setLocalizacaoNegada(res.denied);
+    } finally {
+      setCarregandoLocalizacao(false);
+    }
   };
 
   return (
@@ -45,6 +86,7 @@ function BaterPonto() {
             onCapture={(imagem) => {
               setFoto(imagem);
               setMomentoMarcacao(new Date());
+              setLocalizacao(null);
               setMostrarPrevia(true);
             }}
             onPermissaoNegada={() => {
@@ -75,7 +117,10 @@ function BaterPonto() {
                   // registro sem foto
                   setFoto(null);
                   setMomentoMarcacao(new Date());
+                  setLocalizacao(null);
                   setMostrarPrevia(true);
+                  setLocalizacao(null);
+                  setLocalizacaoNegada(false);
                 } else {
                   // registro com foto
                   document.getElementById("capturar-foto")?.click();
@@ -99,22 +144,33 @@ function BaterPonto() {
         <Previa
           foto={foto}
           momento={momentoMarcacao}
+          localizacao={localizacao}
+          carregandoLocalizacao={carregandoLocalizacao}
+          localizacaoNegada={localizacaoNegada}
+          onSolicitarLocalizacao={solicitarLocalizacao}
           onFechar={() => setMostrarPrevia(false)}
           onRefazer={() => {
             setFoto(null);
             setMomentoMarcacao(null);
+            setLocalizacao(null);
             setMostrarPrevia(false);
+            setLocalizacao(null);
+            setLocalizacaoNegada(false);
           }}
           onConfirmar={async () => {
             try {
               await api.post("/pontos", {
                 momento: toLocalDateTimeString(momentoMarcacao),
                 fotoBase: foto,
+                latitude: localizacao?.latitude ?? null,
+                longitude: localizacao?.longitude ?? null,
               });
 
               setMostrarPrevia(false);
               setFoto(null);
               setMomentoMarcacao(null);
+              setLocalizacao(null);
+              setLocalizacaoNegada(false);
             } catch (e) {
               console.error(e);
               alert("Erro ao registrar ponto");
