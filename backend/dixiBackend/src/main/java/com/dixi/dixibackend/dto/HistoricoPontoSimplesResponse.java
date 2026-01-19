@@ -4,9 +4,9 @@ import java.util.List;
 
 public class HistoricoPontoSimplesResponse {
     public String data;
-    public List<String> marcacoes;
+    public List<MarcacaoResponse> marcacoes;
 
-    public HistoricoPontoSimplesResponse(String data, List<String> marcacoes) {
+    public HistoricoPontoSimplesResponse(String data, List<MarcacaoResponse> marcacoes) {
         this.data = data;
         this.marcacoes = marcacoes;
     }

@@ -76,7 +76,6 @@ function Previa({
                 </p>
               </div>
             )}
-
             <p className="text-gray-600 text-lg font-semibold text-center">
               Você deseja registrar esse ponto?
             </p>

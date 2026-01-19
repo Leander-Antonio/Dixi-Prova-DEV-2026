@@ -145,11 +145,20 @@ function HistoricoPonto() {
                         <button
                           key={idx}
                           type="button"
-                          onClick={() => setMarcacaoSelecionada({ momento: m })}
+                          onClick={() =>
+                            setMarcacaoSelecionada({
+                              momento: m.momento,
+                              foto: m.fotoBase,
+                              localizacao: {
+                                latitude: m.latitude,
+                                longitude: m.longitude,
+                              },
+                            })
+                          }
                           className="px-3 py-1 rounded-lg border border-[#3379BC] text-[#3379BC] font-semibold
-                   hover:bg-[#3379BC] hover:text-white transition cursor-pointer"
+      hover:bg-[#3379BC] hover:text-white transition cursor-pointer"
                         >
-                          {m}
+                          {m.momento}
                         </button>
                       ))}
                     </div>
@@ -167,6 +176,7 @@ function HistoricoPonto() {
       <DadosMarcacao
         foto={marcacaoSelecionada?.foto}
         momento={marcacaoSelecionada?.momento}
+        localizacao={marcacaoSelecionada?.localizacao}
         onFechar={() => setMarcacaoSelecionada(null)}
       />
     </div>

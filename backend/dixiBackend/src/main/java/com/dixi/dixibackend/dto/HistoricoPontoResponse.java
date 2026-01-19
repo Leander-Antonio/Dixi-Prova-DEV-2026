@@ -1,6 +1,7 @@
 package com.dixi.dixibackend.dto;
 
 import java.util.List;
+import com.dixi.dixibackend.dto.MarcacaoResponse;
 
 public class HistoricoPontoResponse {
 
