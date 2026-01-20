@@ -1,5 +1,6 @@
 import ClockStatic from "./ClockStatic";
 import { useEffect } from "react";
+import BotaoFechar from "./BotaoFechar";
 
 import {
   XMarkIcon,
@@ -29,12 +30,7 @@ function Previa({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-white rounded-2xl w-[900px] h-[480px] flex flex-col relative overflow-hidden">
-        <button
-          onClick={onFechar}
-          className="absolute border-3 border-[#3379BC] rounded-md top-4 right-4 text-[#3379BC] hover:bg-[#3379BC] hover:text-white cursor-pointer"
-        >
-          <XMarkIcon className="w-6 h-6 stroke-2" />
-        </button>
+        <BotaoFechar onClick={onFechar} />
 
         <h2 className="text-2xl font-bold text-[#3379BC] mt-4 ml-8">
           Prévia da Marcação

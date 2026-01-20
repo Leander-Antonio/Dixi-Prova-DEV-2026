@@ -14,7 +14,7 @@ function ClockStatic({ data }) {
       dt = new Date();
       dt.setHours(hh, mm, 0, 0);
     } else {
-      // ISO / "YYYY-MM-DD" / etc.
+      // "YYYY-MM-DD"
       dt = new Date(data);
     }
   }
