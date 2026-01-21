@@ -1,10 +1,9 @@
 package com.dixi.dixibackend.service;
 
-import com.dixi.dixibackend.dto.CriarPontoRequest;
-import com.dixi.dixibackend.dto.HistoricoPontoResponse;
-import com.dixi.dixibackend.dto.HistoricoPontoSimplesResponse;
-import com.dixi.dixibackend.dto.MarcacaoResponse;
+import com.dixi.dixibackend.dto.*;
+import com.dixi.dixibackend.model.Desconsideracao;
 import com.dixi.dixibackend.model.Ponto;
+import com.dixi.dixibackend.repository.DesconsideracaoRepository;
 import com.dixi.dixibackend.repository.PontoRepository;
 import org.springframework.stereotype.Service;
 
@@ -17,9 +16,11 @@ import java.util.stream.Collectors;
 public class PontoService {
 
     private final PontoRepository repository;
+    private final DesconsideracaoRepository desconsideracaoRepository;
 
-    public PontoService(PontoRepository repository) {
+    public PontoService(PontoRepository repository, DesconsideracaoRepository desconsideracaoRepository) {
         this.repository = repository;
+        this.desconsideracaoRepository = desconsideracaoRepository;
     }
 
     // Registra um novo ponto
@@ -29,7 +30,6 @@ public class PontoService {
         ponto.setMomento(LocalDateTime.parse(request.momento));
         ponto.setFotoBase(request.fotoBase);
 
-        // salva localização
         ponto.setLatitude(request.latitude);
         ponto.setLongitude(request.longitude);
 
@@ -42,16 +42,14 @@ public class PontoService {
         LocalDateTime dataFim = fim.atTime(LocalTime.MAX);
 
         List<Ponto> pontos = repository
-                .findByMomentoBetweenOrderByMomentoAsc(dataInicio, dataFim);
+                .findByDesconsideradaIsFalseAndMomentoBetweenOrderByMomentoAsc(dataInicio, dataFim);
 
         Map<LocalDate, List<Ponto>> agrupadoPorDia =
-                pontos.stream().collect(
-                        Collectors.groupingBy(
-                                p -> p.getMomento().toLocalDate(),
-                                LinkedHashMap::new,
-                                Collectors.toList()
-                        )
-                );
+                pontos.stream().collect(Collectors.groupingBy(
+                        p -> p.getMomento().toLocalDate(),
+                        LinkedHashMap::new,
+                        Collectors.toList()
+                ));
 
         DateTimeFormatter formatoHora = DateTimeFormatter.ofPattern("HH:mm");
         List<HistoricoPontoResponse> resposta = new ArrayList<>();
@@ -59,7 +57,6 @@ public class PontoService {
         for (var entrada : agrupadoPorDia.entrySet()) {
             List<Ponto> lista = entrada.getValue();
 
-            // horários
             List<String> marcacoes = lista.stream()
                     .map(p -> p.getMomento().toLocalTime().format(formatoHora))
                     .toList();
@@ -88,16 +85,14 @@ public class PontoService {
         LocalDateTime dataFim = fim.atTime(LocalTime.MAX);
 
         List<Ponto> pontos = repository
-                .findByMomentoBetweenOrderByMomentoAsc(dataInicio, dataFim);
+                .findByDesconsideradaIsFalseAndMomentoBetweenOrderByMomentoAsc(dataInicio, dataFim);
 
         Map<LocalDate, List<Ponto>> agrupadoPorDia =
-                pontos.stream().collect(
-                        Collectors.groupingBy(
-                                p -> p.getMomento().toLocalDate(),
-                                LinkedHashMap::new,
-                                Collectors.toList()
-                        )
-                );
+                pontos.stream().collect(Collectors.groupingBy(
+                        p -> p.getMomento().toLocalDate(),
+                        LinkedHashMap::new,
+                        Collectors.toList()
+                ));
 
         DateTimeFormatter formatoHora = DateTimeFormatter.ofPattern("HH:mm");
         List<HistoricoPontoSimplesResponse> resposta = new ArrayList<>();
@@ -107,10 +102,11 @@ public class PontoService {
 
             List<MarcacaoResponse> marcacoes = lista.stream()
                     .map(p -> new MarcacaoResponse(
+                            p.getId(),
                             p.getMomento().toLocalTime().format(formatoHora),
                             p.getLatitude(),
                             p.getLongitude(),
-                            p.getFotoBase() // se ficar pesado, troca por null
+                            p.getFotoBase()
                     ))
                     .toList();
 
@@ -121,6 +117,82 @@ public class PontoService {
         }
 
         return resposta;
+    }
+
+    // DESCONSIDERADAS  busca o motivo na tabela
+    public List<HistoricoDesconsideradasResponse> buscarDesconsideradas(LocalDate inicio, LocalDate fim) {
+        LocalDateTime dataInicio = inicio.atStartOfDay();
+        LocalDateTime dataFim = fim.atTime(LocalTime.MAX);
+
+        List<Ponto> pontos = repository
+                .findByDesconsideradaIsTrueAndMomentoBetweenOrderByMomentoAsc(dataInicio, dataFim);
+
+        Map<LocalDate, List<Ponto>> agrupadoPorDia =
+                pontos.stream().collect(Collectors.groupingBy(
+                        p -> p.getMomento().toLocalDate(),
+                        LinkedHashMap::new,
+                        Collectors.toList()
+                ));
+
+        DateTimeFormatter formatoHora = DateTimeFormatter.ofPattern("HH:mm");
+        List<HistoricoDesconsideradasResponse> resposta = new ArrayList<>();
+
+        for (var entrada : agrupadoPorDia.entrySet()) {
+            List<Ponto> lista = entrada.getValue();
+
+            List<MarcacaoDesconsideradaResponse> marcacoes = lista.stream()
+                    .map(p -> {
+                        String mot = desconsideracaoRepository.findByPontoId(p.getId())
+                                .map(Desconsideracao::getMotivo)
+                                .orElse(null);
+
+                        return new MarcacaoDesconsideradaResponse(
+                                p.getId(),
+                                p.getMomento().toLocalTime().format(formatoHora),
+                                mot,
+                                p.getLatitude(),
+                                p.getLongitude(),
+                                p.getFotoBase()
+                        );
+                    })
+                    .toList();
+
+            resposta.add(new HistoricoDesconsideradasResponse(
+                    entrada.getKey().toString(),
+                    marcacoes
+            ));
+        }
+
+        return resposta;
+    }
+
+    // DESCONSIDERAR
+    public void desconsiderar(Long id, String motivo) {
+        Ponto p = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ponto não encontrado: " + id));
+
+        String motivoFinal = (motivo == null || motivo.isBlank()) ? "ADMIN" : motivo;
+
+        Desconsideracao d = desconsideracaoRepository.findByPontoId(id)
+                .orElseGet(Desconsideracao::new);
+
+        d.setPonto(p);
+        d.setMotivo(motivoFinal);
+        desconsideracaoRepository.save(d);
+
+        p.setDesconsiderada(true);
+        repository.save(p);
+    }
+
+    // RECONSIDERAR
+    public void reconsiderar(Long id) {
+        Ponto p = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ponto não encontrado: " + id));
+
+        desconsideracaoRepository.deleteByPontoId(id);
+
+        p.setDesconsiderada(false);
+        repository.save(p);
     }
 
     private String formatarMinutos(long minutos) {

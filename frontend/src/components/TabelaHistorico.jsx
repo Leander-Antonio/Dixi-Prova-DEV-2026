@@ -36,8 +36,8 @@ function TabelaHistorico({ linhas = [], onSelectMarcacao }) {
                       key={idx}
                       type="button"
                       onClick={() => onSelectMarcacao?.(m)}
-                      className="px-3 py-1 rounded-lg border border-[#3379BC] text-[#3379BC] font-semibold
-                        hover:bg-[#3379BC] hover:text-white transition cursor-pointer"
+                      className="min-w-[55px] py-1 rounded-lg border border-[#3379BC] text-[#3379BC] font-semibold
+hover:bg-[#3379BC] hover:text-white transition cursor-pointer text-center"
                     >
                       {m.momento}
                     </button>

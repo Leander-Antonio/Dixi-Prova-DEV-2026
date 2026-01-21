@@ -1,0 +1,11 @@
+package com.dixi.dixibackend.repository;
+
+import com.dixi.dixibackend.model.Desconsideracao;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface DesconsideracaoRepository extends JpaRepository<Desconsideracao, Long> {
+    Optional<Desconsideracao> findByPontoId(Long pontoId);
+    void deleteByPontoId(Long pontoId);
+}

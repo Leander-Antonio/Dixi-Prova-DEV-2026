@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SideBar from "./components/SideBar";
 import BaterPonto from "./pages/BaterPonto/BaterPonto";
 import HistoricoPonto from "./pages/HistoricoPonto/HistoricoPonto";
+import MarcacoesDesconsideradas from "./pages/MarcacoesDesconsideradas/MarcacoesDesconsideradas";
 
 function App() {
   return (
@@ -16,6 +17,10 @@ function App() {
             <Route path="/" element={<BaterPonto />} />
             <Route path="/bater-ponto" element={<BaterPonto />} />
             <Route path="/historico-ponto" element={<HistoricoPonto />} />
+            <Route
+              path="/marcacoes-desconsideradas"
+              element={<MarcacoesDesconsideradas />}
+            />
           </Routes>
         </div>
       </div>

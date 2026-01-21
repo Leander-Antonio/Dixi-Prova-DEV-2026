@@ -40,6 +40,25 @@ function HistoricoPonto() {
     return `${dia}/${mes}/${ano}`;
   };
 
+  const desconsiderarMarcacao = async () => {
+    if (!marcacaoSelecionada?.id) {
+      alert("Essa marcação não pode ser desconsiderada.");
+      return;
+    }
+
+    try {
+      await api.post(`/pontos/${marcacaoSelecionada.id}/desconsiderar`, {
+        motivo: "ADMIN",
+      });
+
+      alert("Marcação desconsiderada!");
+      setMarcacaoSelecionada(null);
+      await buscar();
+    } catch (err) {
+      alert("Falhou ao desconsiderar a marcação.");
+    }
+  };
+
   return (
     <div className="w-full ml-20 mt-10">
       {/* TÍTULO */}
@@ -122,12 +141,11 @@ function HistoricoPonto() {
           linhas={linhas}
           onSelectMarcacao={(m) =>
             setMarcacaoSelecionada({
+              id: m.id,
               momento: m.momento,
               foto: m.fotoBase,
-              localizacao: {
-                latitude: m.latitude,
-                longitude: m.longitude,
-              },
+              localizacao: { latitude: m.latitude, longitude: m.longitude },
+              motivo: m.motivo,
             })
           }
         />
@@ -137,6 +155,8 @@ function HistoricoPonto() {
         momento={marcacaoSelecionada?.momento}
         localizacao={marcacaoSelecionada?.localizacao}
         onFechar={() => setMarcacaoSelecionada(null)}
+        onDesconsiderar={desconsiderarMarcacao}
+        modo="desconsiderar"
       />
     </div>
   );

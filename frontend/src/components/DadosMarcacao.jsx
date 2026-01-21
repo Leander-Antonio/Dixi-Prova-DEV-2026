@@ -3,18 +3,24 @@ import BotaoFechar from "./BotaoFechar";
 
 import { VideoCameraSlashIcon } from "@heroicons/react/24/outline";
 
-function DadosMarcacao({ foto, momento, localizacao, onFechar }) {
+function DadosMarcacao({
+  foto,
+  momento,
+  localizacao,
+  onFechar,
+  onDesconsiderar,
+  onReconsiderar,
+  modo = "desconsiderar",
+  motivoDesconsideracao,
+}) {
   if (!momento) return null;
 
   const lat = localizacao?.latitude;
   const lon = localizacao?.longitude;
 
-  const textoLocalizacao =
-    lat != null && lon != null ? `${lat.toFixed(6)}, ${lon.toFixed(6)}` : null;
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-2xl w-[1200px] h-[480px] flex flex-col relative overflow-hidden border-4 border-[#3379BC]">
+      <div className="bg-white rounded-2xl w-[1200px] h-[500px] flex flex-col relative overflow-hidden">
         {/* fechar */}
         <BotaoFechar onClick={onFechar} />
 
@@ -22,7 +28,7 @@ function DadosMarcacao({ foto, momento, localizacao, onFechar }) {
           Dados da Marcação
         </h2>
 
-        <div className="grid grid-cols-3 flex-1 px-8 py-4 items-center">
+        <div className="grid grid-cols-3 flex-1 px-8 py-1 items-center">
           {/* ESQUERDA */}
           <div className="flex items-center justify-start">
             {foto ? (
@@ -42,12 +48,24 @@ function DadosMarcacao({ foto, momento, localizacao, onFechar }) {
           {/* CENTRO */}
           <div className="flex flex-col items-center justify-center">
             <ClockStatic data={momento} />
+
+            {modo === "reconsiderar" && motivoDesconsideracao && (
+              <div className="mt-3 w-[360px] text-center">
+                <p className="text-xs font-semibold text-red-600">
+                  Marcação desconsiderada
+                </p>
+                <p className="text-sm text-gray-600">
+                  Motivo:{" "}
+                  <span className="font-semibold">{motivoDesconsideracao}</span>
+                </p>
+              </div>
+            )}
           </div>
 
           {/* DIREITA */}
-          <div className="flex items-center justify-end">
+          <div className="flex flex-col items-end justify-center gap-3">
             {lat != null && lon != null && (
-              <div className="w-[360px] h-[360px] rounded-xl overflow-hidden border border-gray-200">
+              <div className="w-[360px] h-[280px] rounded-xl overflow-hidden border border-gray-200 mb-20">
                 <iframe
                   title="Mapa da marcação"
                   width="100%"
@@ -56,12 +74,28 @@ function DadosMarcacao({ foto, momento, localizacao, onFechar }) {
                   referrerPolicy="no-referrer-when-downgrade"
                   src={`https://www.openstreetmap.org/export/embed.html?bbox=${
                     lon - 0.002
-                  },${lat - 0.002},${lon + 0.002},${
-                    lat + 0.002
-                  }&layer=mapnik&marker=${lat},${lon}`}
+                  },${lat - 0.002},${lon + 0.002},${lat + 0.002}&layer=mapnik&marker=${lat},${lon}`}
                 />
               </div>
             )}
+
+            {/* Botão desconsiderar */}
+            <button
+              type="button"
+              onClick={
+                modo === "desconsiderar" ? onDesconsiderar : onReconsiderar
+              }
+              className={`absolute bottom-13 right-8 w-[360px] h-11 rounded-md border font-semibold transition cursor-pointer
+    ${
+      modo === "desconsiderar"
+        ? "border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+        : "border-green-600 text-green-600 hover:bg-green-600 hover:text-white"
+    }`}
+            >
+              {modo === "desconsiderar"
+                ? "Desconsiderar marcação"
+                : "Reconsiderar marcação"}
+            </button>
           </div>
         </div>
       </div>

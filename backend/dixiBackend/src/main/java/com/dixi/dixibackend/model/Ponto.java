@@ -24,6 +24,12 @@ public class Ponto {
     @Column(name = "longitude")
     private Double longitude;
 
+    @Column(nullable = false)
+    private boolean desconsiderada = false;
+
+    @OneToOne(mappedBy = "ponto", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Desconsideracao desconsideracao;
+
     // getters/setters
     public Long getId() { return id; }
 
@@ -38,4 +44,10 @@ public class Ponto {
 
     public Double getLongitude() { return longitude; }
     public void setLongitude(Double longitude) { this.longitude = longitude; }
+
+    public boolean isDesconsiderada() { return desconsiderada; }
+    public void setDesconsiderada(boolean desconsiderada) { this.desconsiderada = desconsiderada; }
+
+    public Desconsideracao getDesconsideracao() { return desconsideracao; }
+    public void setDesconsideracao(Desconsideracao desconsideracao) { this.desconsideracao = desconsideracao; }
 }

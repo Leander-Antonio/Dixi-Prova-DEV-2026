@@ -6,6 +6,8 @@ import com.dixi.dixibackend.dto.HistoricoPontoSimplesResponse;
 import com.dixi.dixibackend.model.Ponto;
 import com.dixi.dixibackend.service.PontoService;
 import org.springframework.web.bind.annotation.*;
+import com.dixi.dixibackend.dto.HistoricoDesconsideradasResponse;
+import java.util.Map;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -49,4 +51,32 @@ public class PontoController {
                 LocalDate.parse(fim)
         );
     }
+    // DESCONSIDERADAS
+    @GetMapping("/desconsideradas")
+    public List<HistoricoDesconsideradasResponse> desconsideradas(
+            @RequestParam String inicio,
+            @RequestParam String fim
+    ) {
+        return service.buscarDesconsideradas(
+                LocalDate.parse(inicio),
+                LocalDate.parse(fim)
+        );
+    }
+    // DESCONSIDERAR MARCAÇÃO (ADMIN)
+    @PostMapping("/{id}/desconsiderar")
+    public void desconsiderar(
+            @PathVariable Long id,
+            @RequestBody(required = false) Map<String, String> body
+    ) {
+        String motivo = body != null ? body.get("motivo") : null; // "ADMIN"
+        service.desconsiderar(id, motivo);
+    }
+
+    // RECONSIDERAR MARCAÇÃO
+    @PostMapping("/{id}/reconsiderar")
+    public void reconsiderar(@PathVariable Long id) {
+        service.reconsiderar(id);
+    }
+
+
 }
