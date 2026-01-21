@@ -1,12 +1,11 @@
 function ClockStatic({ data }) {
   if (!data) return null;
 
-  let dt;
+  let dt = null;
 
   if (data instanceof Date) {
     dt = data;
   } else if (typeof data === "string") {
-    // se vier só "HH:mm"
     const soHora = /^\d{2}:\d{2}$/.test(data);
 
     if (soHora) {
@@ -14,8 +13,11 @@ function ClockStatic({ data }) {
       dt = new Date();
       dt.setHours(hh, mm, 0, 0);
     } else {
-      // "YYYY-MM-DD"
       dt = new Date(data);
+
+      if (Number.isNaN(dt.getTime()) && /^\d{4}-\d{2}-\d{2} /.test(data)) {
+        dt = new Date(data.replace(" ", "T"));
+      }
     }
   }
 

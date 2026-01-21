@@ -1,8 +1,21 @@
 function TabelaHistorico({ linhas = [], onSelectMarcacao }) {
   const formatarDataBR = (dataISO) => {
     if (!dataISO) return "";
-    const [ano, mes, dia] = dataISO.split("-");
+    const [ano, mes, dia] = String(dataISO).split("-");
+    if (!ano || !mes || !dia) return String(dataISO);
     return `${dia}/${mes}/${ano}`;
+  };
+
+  const formatarHora = (momento) => {
+    if (!momento) return "";
+
+    const dt = new Date(momento);
+    if (Number.isNaN(dt.getTime())) return "";
+
+    return dt.toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   return (
@@ -33,13 +46,13 @@ function TabelaHistorico({ linhas = [], onSelectMarcacao }) {
                 <div className="flex flex-wrap gap-2">
                   {linha.marcacoes?.map((m, idx) => (
                     <button
-                      key={idx}
+                      key={m?.id ?? idx}
                       type="button"
                       onClick={() => onSelectMarcacao?.(m)}
                       className="min-w-[55px] py-1 rounded-lg border border-[#3379BC] text-[#3379BC] font-semibold
 hover:bg-[#3379BC] hover:text-white transition cursor-pointer text-center"
                     >
-                      {m.momento}
+                      {formatarHora(m?.momento)}
                     </button>
                   ))}
                 </div>

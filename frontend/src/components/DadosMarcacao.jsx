@@ -2,7 +2,11 @@ import ClockStatic from "./ClockStatic";
 import BotaoFechar from "./BotaoFechar";
 import MotivoDesconsideracao from "./MotivoDesconsideracao";
 
-import { VideoCameraSlashIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowPathIcon,
+  TrashIcon,
+  VideoCameraSlashIcon,
+} from "@heroicons/react/24/outline";
 
 function DadosMarcacao({
   foto,
@@ -21,11 +25,11 @@ function DadosMarcacao({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-2xl w-[1200px] h-[500px] flex flex-col relative overflow-hidden">
+      <div className="bg-white rounded-2xl w-[1200px] h-[450px] flex flex-col relative overflow-hidden">
         {/* fechar */}
         <BotaoFechar onClick={onFechar} />
 
-        <h2 className="text-2xl font-bold text-[#3379BC] mt-4 ml-8">
+        <h2 className="text-3xl font-bold text-[#3379BC] mt-4 ml-8">
           Dados da Marcação
         </h2>
 
@@ -76,16 +80,23 @@ function DadosMarcacao({
               onClick={
                 modo === "desconsiderar" ? onDesconsiderar : onReconsiderar
               }
-              className={`absolute bottom-13 right-8 w-[360px] h-11 rounded-md border font-semibold transition cursor-pointer
-    ${
-      modo === "desconsiderar"
-        ? "border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
-        : "border-green-600 text-green-600 hover:bg-green-600 hover:text-white"
-    }`}
+              className="absolute bottom-7 right-7.5 w-[360px] h-11
+    bg-[#3379BC] shadow rounded
+    text-white font-semibold text-[16px]
+    flex items-center justify-center gap-2
+    hover:bg-[#40A5DD] transition cursor-pointer"
             >
-              {modo === "desconsiderar"
-                ? "Desconsiderar marcação"
-                : "Reconsiderar marcação"}
+              {modo === "desconsiderar" ? (
+                <>
+                  <TrashIcon className="w-5 h-5 stroke-2" />
+                  Desconsiderar marcação
+                </>
+              ) : (
+                <>
+                  <ArrowPathIcon className="w-5 h-5 stroke-2" />
+                  Reconsiderar marcação
+                </>
+              )}
             </button>
           </div>
         </div>

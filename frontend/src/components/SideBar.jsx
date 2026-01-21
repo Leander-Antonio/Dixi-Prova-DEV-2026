@@ -39,7 +39,7 @@ function SideBar() {
         to="/marcacoes-desconsideradas"
         className="text-white flex flex-col items-center justify-center font-semibold h-[100px] w-full hover:bg-[#2a66a3]"
       >
-        <XCircleIcon className="h-8 w-8 stroke-2 mb-1" />
+        <XCircleIcon className="h-9 w-9 stroke-2 mb-1" />
         <span>Marcações</span>
         <span>Desconsideradas</span>
       </Link>

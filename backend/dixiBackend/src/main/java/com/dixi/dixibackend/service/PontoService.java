@@ -113,7 +113,7 @@ public class PontoService {
                         Collectors.toList()
                 ));
 
-        DateTimeFormatter formatoHora = DateTimeFormatter.ofPattern("HH:mm");
+        DateTimeFormatter formatoDataHora = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         List<HistoricoPontoSimplesResponse> resposta = new ArrayList<>();
 
         for (var entrada : agrupadoPorDia.entrySet()) {
@@ -122,7 +122,7 @@ public class PontoService {
             List<MarcacaoResponse> marcacoes = lista.stream()
                     .map(p -> new MarcacaoResponse(
                             p.getId(),
-                            p.getMomento().toLocalTime().format(formatoHora),
+                            p.getMomento(),
                             p.getLatitude(),
                             p.getLongitude(),
                             p.getFotoBase()
@@ -137,6 +137,7 @@ public class PontoService {
 
         return resposta;
     }
+
 
     // DESCONSIDERADAS  busca o motivo na tabela
     public List<HistoricoDesconsideradasResponse> buscarDesconsideradas(LocalDate inicio, LocalDate fim) {
@@ -153,7 +154,7 @@ public class PontoService {
                         Collectors.toList()
                 ));
 
-        DateTimeFormatter formatoHora = DateTimeFormatter.ofPattern("HH:mm");
+        DateTimeFormatter formatoDataHora = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         List<HistoricoDesconsideradasResponse> resposta = new ArrayList<>();
 
         for (var entrada : agrupadoPorDia.entrySet()) {
@@ -167,7 +168,7 @@ public class PontoService {
 
                         return new MarcacaoDesconsideradaResponse(
                                 p.getId(),
-                                p.getMomento().toLocalTime().format(formatoHora),
+                                p.getMomento().format(formatoDataHora), // ISO completo
                                 mot,
                                 p.getLatitude(),
                                 p.getLongitude(),
@@ -184,6 +185,7 @@ public class PontoService {
 
         return resposta;
     }
+
 
     // DESCONSIDERAR
     public void desconsiderar(Long id, String motivo) {

@@ -1,8 +1,21 @@
 function TabelaMarcacoesDesconsideradas({ linhas = [], onSelectMarcacao }) {
   const formatarDataBR = (dataISO) => {
     if (!dataISO) return "";
-    const [ano, mes, dia] = dataISO.split("-");
+    const [ano, mes, dia] = String(dataISO).split("-");
+    if (!ano || !mes || !dia) return String(dataISO);
     return `${dia}/${mes}/${ano}`;
+  };
+
+  const formatarHora = (momento) => {
+    if (!momento) return "-";
+
+    const dt = new Date(momento);
+    if (Number.isNaN(dt.getTime())) return "-";
+
+    return dt.toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   const motivoLabel = (motivo) => {
@@ -12,19 +25,6 @@ function TabelaMarcacoesDesconsideradas({ linhas = [], onSelectMarcacao }) {
     if (m === "ADMIN" || m === "DESCONSIDERADA_PELO_ADMIN") return "Admin";
 
     return motivo ? "Outro" : "-";
-  };
-
-  const resumoMotivosDoDia = (marcacoes = []) => {
-    const labels = marcacoes
-      .map((m) => motivoLabel(m?.motivo))
-      .filter((x) => x && x !== "-");
-
-    if (labels.length === 0) return "-";
-
-    const unicos = Array.from(new Set(labels));
-    if (unicos.length === 1) return unicos[0];
-
-    return `${unicos.length} motivos`;
   };
 
   return (
@@ -50,22 +50,18 @@ function TabelaMarcacoesDesconsideradas({ linhas = [], onSelectMarcacao }) {
 
               <td className="py-3 pl-6 border-t border-gray-300 border-l text-left">
                 <div className="flex flex-wrap gap-2">
-                  {linha.marcacoes?.map((m, idx) => {
-                    const label = motivoLabel(m?.motivo);
-
-                    return (
-                      <button
-                        key={m.id ?? idx}
-                        type="button"
-                        onClick={() => onSelectMarcacao?.(m)}
-                        className="min-w-[55px] py-1 rounded-lg border border-[#3379BC] text-[#3379BC] font-semibold
+                  {linha.marcacoes?.map((m, idx) => (
+                    <button
+                      key={m?.id ?? idx}
+                      type="button"
+                      onClick={() => onSelectMarcacao?.(m)}
+                      className="min-w-[55px] py-1 rounded-lg border border-[#3379BC] text-[#3379BC] font-semibold
 hover:bg-[#3379BC] hover:text-white transition cursor-pointer text-center"
-                        title={m?.motivo ?? ""}
-                      >
-                        <span>{m.momento ?? "-"}</span>
-                      </button>
-                    );
-                  })}
+                      title={motivoLabel(m?.motivo)}
+                    >
+                      {formatarHora(m?.momento)}
+                    </button>
+                  ))}
                 </div>
               </td>
             </tr>
@@ -74,7 +70,7 @@ hover:bg-[#3379BC] hover:text-white transition cursor-pointer text-center"
           {linhas.length === 0 && (
             <tr>
               <td
-                colSpan={4}
+                colSpan={2}
                 className="py-6 text-center text-gray-400 font-semibold"
               >
                 Nenhuma marcação desconsiderada no período.
