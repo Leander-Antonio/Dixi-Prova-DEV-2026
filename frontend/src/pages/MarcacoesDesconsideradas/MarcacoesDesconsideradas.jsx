@@ -92,6 +92,7 @@ function MarcacoesDesconsideradas() {
               id: m.id,
               momento: m.momento,
               foto: m.fotoBase,
+              motivo: m.motivo,
               localizacao: {
                 latitude: m.latitude,
                 longitude: m.longitude,
@@ -105,11 +106,23 @@ function MarcacoesDesconsideradas() {
         foto={marcacaoSelecionada?.foto}
         momento={marcacaoSelecionada?.momento}
         localizacao={marcacaoSelecionada?.localizacao}
+        motivoDesconsideracao={marcacaoSelecionada?.motivo}
         onFechar={() => setMarcacaoSelecionada(null)}
         onReconsiderar={async () => {
-          await api.post(`/pontos/${marcacaoSelecionada.id}/reconsiderar`);
-          setMarcacaoSelecionada(null);
-          buscar();
+          try {
+            await api.post(`/pontos/${marcacaoSelecionada.id}/reconsiderar`);
+
+            alert("Marcação reconsiderada com sucesso");
+
+            setMarcacaoSelecionada(null);
+            await buscar();
+          } catch (err) {
+            const msg =
+              err?.response?.data?.message ||
+              err?.response?.data ||
+              "Erro ao reconsiderar";
+            alert(msg);
+          }
         }}
         modo="reconsiderar"
       />

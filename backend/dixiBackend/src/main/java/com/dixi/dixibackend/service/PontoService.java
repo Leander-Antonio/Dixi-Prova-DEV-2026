@@ -6,11 +6,12 @@ import com.dixi.dixibackend.model.Ponto;
 import com.dixi.dixibackend.repository.DesconsideracaoRepository;
 import com.dixi.dixibackend.repository.PontoRepository;
 import org.springframework.stereotype.Service;
-
+import java.time.temporal.ChronoUnit;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PontoService {
@@ -27,13 +28,31 @@ public class PontoService {
     public Ponto registrarPonto(CriarPontoRequest request) {
         Ponto ponto = new Ponto();
 
-        ponto.setMomento(LocalDateTime.parse(request.momento));
+        LocalDateTime momento = LocalDateTime.parse(request.momento);
+        ponto.setMomento(momento);
         ponto.setFotoBase(request.fotoBase);
-
         ponto.setLatitude(request.latitude);
         ponto.setLongitude(request.longitude);
 
-        return repository.save(ponto);
+        LocalDateTime inicioMinuto = momento.truncatedTo(ChronoUnit.MINUTES);
+        LocalDateTime fimMinuto = inicioMinuto.plusMinutes(1).minusNanos(1);
+
+        boolean jaExisteValidaNoMesmoMinuto =
+                repository.existsByDesconsideradaIsFalseAndMomentoBetween(inicioMinuto, fimMinuto);
+
+        Ponto salvo = repository.save(ponto);
+
+        if (jaExisteValidaNoMesmoMinuto) {
+            Desconsideracao d = new Desconsideracao();
+            d.setPonto(salvo);
+            d.setMotivo("MARCACAO_DUPLICADA");
+            desconsideracaoRepository.save(d);
+
+            salvo.setDesconsiderada(true);
+            salvo = repository.save(salvo);
+        }
+
+        return salvo;
     }
 
     // HISTÓRICO CALCULADO
@@ -185,15 +204,38 @@ public class PontoService {
     }
 
     // RECONSIDERAR
+    @Transactional
     public void reconsiderar(Long id) {
         Ponto p = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Ponto não encontrado: " + id));
 
-        desconsideracaoRepository.deleteByPontoId(id);
+        LocalDateTime momento = p.getMomento();
+        LocalDateTime inicioMinuto = momento.truncatedTo(ChronoUnit.MINUTES);
+        LocalDateTime fimMinuto = inicioMinuto.plusMinutes(1).minusNanos(1);
+
+        boolean existeOutraValidaNoMesmoMinuto =
+                repository.existsByDesconsideradaIsFalseAndMomentoBetweenAndIdNot(
+                        inicioMinuto, fimMinuto, id
+                );
+
+        if (existeOutraValidaNoMesmoMinuto) {
+            throw new RuntimeException("Marcação já existente");
+        }
+
+        Desconsideracao d = p.getDesconsideracao();
+        if (d != null) {
+            p.setDesconsideracao(null);
+            d.setPonto(null);
+            desconsideracaoRepository.delete(d);
+        } else {
+            desconsideracaoRepository.findByPontoId(id).ifPresent(desconsideracaoRepository::delete);
+        }
 
         p.setDesconsiderada(false);
         repository.save(p);
     }
+
+
 
     private String formatarMinutos(long minutos) {
         return (minutos / 60) + "h " + (minutos % 60) + "m";

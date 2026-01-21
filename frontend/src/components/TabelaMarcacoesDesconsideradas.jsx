@@ -63,12 +63,6 @@ hover:bg-[#3379BC] hover:text-white transition cursor-pointer text-center"
                         title={m?.motivo ?? ""}
                       >
                         <span>{m.momento ?? "-"}</span>
-
-                        {label !== "-" && (
-                          <span className="text-xs font-bold px-2 py-0.5 rounded-full border border-[#3379BC]">
-                            {label}
-                          </span>
-                        )}
                       </button>
                     );
                   })}

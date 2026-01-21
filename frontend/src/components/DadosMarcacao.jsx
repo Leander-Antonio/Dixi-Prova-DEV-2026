@@ -1,5 +1,6 @@
 import ClockStatic from "./ClockStatic";
 import BotaoFechar from "./BotaoFechar";
+import MotivoDesconsideracao from "./MotivoDesconsideracao";
 
 import { VideoCameraSlashIcon } from "@heroicons/react/24/outline";
 
@@ -49,17 +50,7 @@ function DadosMarcacao({
           <div className="flex flex-col items-center justify-center">
             <ClockStatic data={momento} />
 
-            {modo === "reconsiderar" && motivoDesconsideracao && (
-              <div className="mt-3 w-[360px] text-center">
-                <p className="text-xs font-semibold text-red-600">
-                  Marcação desconsiderada
-                </p>
-                <p className="text-sm text-gray-600">
-                  Motivo:{" "}
-                  <span className="font-semibold">{motivoDesconsideracao}</span>
-                </p>
-              </div>
-            )}
+            <MotivoDesconsideracao motivo={motivoDesconsideracao} />
           </div>
 
           {/* DIREITA */}

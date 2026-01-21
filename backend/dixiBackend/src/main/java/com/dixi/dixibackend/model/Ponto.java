@@ -27,7 +27,12 @@ public class Ponto {
     @Column(nullable = false)
     private boolean desconsiderada = false;
 
-    @OneToOne(mappedBy = "ponto", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(
+            mappedBy = "ponto",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     private Desconsideracao desconsideracao;
 
     // getters/setters

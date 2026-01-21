@@ -15,8 +15,23 @@ public interface PontoRepository extends JpaRepository<Ponto, Long> {
             LocalDateTime fim
     );
 
-    // 1: verificar mesmo horário
+    // 1: verificar mesmo horário (EXATO)
     boolean existsByMomento(LocalDateTime momento);
+
+    // 2: verificar MESMO MINUTO (intervalo)
+    boolean existsByMomentoBetween(LocalDateTime inicio, LocalDateTime fim);
+
+    boolean existsByDesconsideradaIsFalseAndMomentoBetweenAndIdNot(
+            LocalDateTime inicio,
+            LocalDateTime fim,
+            Long id
+    );
+
+    boolean existsByDesconsideradaIsFalseAndMomentoBetween(
+            LocalDateTime inicio,
+            LocalDateTime fim
+    );
+
 
     // mostrar desconsiderados
     List<Ponto> findByDesconsideradaIsTrueAndMomentoBetweenOrderByMomentoAsc(
