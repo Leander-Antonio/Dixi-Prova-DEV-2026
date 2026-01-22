@@ -8,3 +8,18 @@
     @apply font-sans;
   }
 }
+
+@keyframes alert-progress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+.animate-alert-progress {
+  animation-name: alert-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}

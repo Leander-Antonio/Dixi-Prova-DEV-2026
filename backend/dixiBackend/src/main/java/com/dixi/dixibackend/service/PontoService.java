@@ -6,12 +6,13 @@ import com.dixi.dixibackend.model.Ponto;
 import com.dixi.dixibackend.repository.DesconsideracaoRepository;
 import com.dixi.dixibackend.repository.PontoRepository;
 import org.springframework.stereotype.Service;
-import java.time.temporal.ChronoUnit;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PontoService {
@@ -55,7 +56,7 @@ public class PontoService {
         return salvo;
     }
 
-    // HISTÓRICO CALCULADO
+    // HISTÓRICO CALCULADO (agora com intervalo também)
     public List<HistoricoPontoResponse> buscarHistorico(LocalDate inicio, LocalDate fim) {
         LocalDateTime dataInicio = inicio.atStartOfDay();
         LocalDateTime dataFim = fim.atTime(LocalTime.MAX);
@@ -76,13 +77,25 @@ public class PontoService {
         for (var entrada : agrupadoPorDia.entrySet()) {
             List<Ponto> lista = entrada.getValue();
 
+            // lista de marcações no formato HH:mm
             List<String> marcacoes = lista.stream()
                     .map(p -> p.getMomento().toLocalTime().format(formatoHora))
                     .toList();
 
-            long minutos = 0;
+            long minutosTrabalhados = 0;
+            long minutosIntervalo = 0;
+
+            // trabalhado: (0-1), (2-3), ...
             for (int i = 0; i + 1 < lista.size(); i += 2) {
-                minutos += Duration.between(
+                minutosTrabalhados += Duration.between(
+                        lista.get(i).getMomento(),
+                        lista.get(i + 1).getMomento()
+                ).toMinutes();
+            }
+
+            // intervalo: (1-2), (3-4), ...
+            for (int i = 1; i + 1 < lista.size(); i += 2) {
+                minutosIntervalo += Duration.between(
                         lista.get(i).getMomento(),
                         lista.get(i + 1).getMomento()
                 ).toMinutes();
@@ -91,7 +104,8 @@ public class PontoService {
             resposta.add(new HistoricoPontoResponse(
                     entrada.getKey().toString(),
                     marcacoes,
-                    formatarMinutos(minutos)
+                    formatarMinutos(minutosTrabalhados),
+                    formatarMinutos(minutosIntervalo)
             ));
         }
 
@@ -113,7 +127,6 @@ public class PontoService {
                         Collectors.toList()
                 ));
 
-        DateTimeFormatter formatoDataHora = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         List<HistoricoPontoSimplesResponse> resposta = new ArrayList<>();
 
         for (var entrada : agrupadoPorDia.entrySet()) {
@@ -138,8 +151,7 @@ public class PontoService {
         return resposta;
     }
 
-
-    // DESCONSIDERADAS  busca o motivo na tabela
+    // DESCONSIDERADAS busca o motivo na tabela
     public List<HistoricoDesconsideradasResponse> buscarDesconsideradas(LocalDate inicio, LocalDate fim) {
         LocalDateTime dataInicio = inicio.atStartOfDay();
         LocalDateTime dataFim = fim.atTime(LocalTime.MAX);
@@ -168,7 +180,7 @@ public class PontoService {
 
                         return new MarcacaoDesconsideradaResponse(
                                 p.getId(),
-                                p.getMomento().format(formatoDataHora), // ISO completo
+                                p.getMomento().format(formatoDataHora),
                                 mot,
                                 p.getLatitude(),
                                 p.getLongitude(),
@@ -185,7 +197,6 @@ public class PontoService {
 
         return resposta;
     }
-
 
     // DESCONSIDERAR
     public void desconsiderar(Long id, String motivo) {
@@ -236,8 +247,6 @@ public class PontoService {
         p.setDesconsiderada(false);
         repository.save(p);
     }
-
-
 
     private String formatarMinutos(long minutos) {
         return (minutos / 60) + "h " + (minutos % 60) + "m";

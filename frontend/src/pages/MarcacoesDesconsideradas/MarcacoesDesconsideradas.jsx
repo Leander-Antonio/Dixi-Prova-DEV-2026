@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import api from "../../services/api";
 import DadosMarcacao from "../../components/DadosMarcacao";
 import TabelaMarcacoesDesconsideradas from "../../components/TabelaMarcacoesDesconsideradas";
+import Alert from "../../components/Alert";
 
 function MarcacoesDesconsideradas() {
   const [linhas, setLinhas] = useState([]);
@@ -11,15 +12,32 @@ function MarcacoesDesconsideradas() {
   const [dataInicial, setDataInicial] = useState("01/01/2026");
   const [dataFinal, setDataFinal] = useState("31/01/2026");
 
+  const [alerta, setAlerta] = useState({
+    open: false,
+    type: "success",
+    message: "",
+  });
+
+  const showAlert = (type, message) => {
+    setAlerta({ open: true, type, message });
+  };
+
   const buscar = async () => {
     const inicio = "2026-01-01";
     const fim = "2026-01-31";
 
-    const res = await api.get("/pontos/desconsideradas", {
-      params: { inicio, fim },
-    });
-
-    setLinhas(res.data);
+    try {
+      const res = await api.get("/pontos/desconsideradas", {
+        params: { inicio, fim },
+      });
+      setLinhas(res.data);
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data ||
+        "Erro ao buscar marcações desconsideradas";
+      showAlert("error", String(msg));
+    }
   };
 
   useEffect(() => {
@@ -112,7 +130,7 @@ function MarcacoesDesconsideradas() {
           try {
             await api.post(`/pontos/${marcacaoSelecionada.id}/reconsiderar`);
 
-            alert("Marcação reconsiderada com sucesso");
+            showAlert("success", "Marcação reconsiderada com sucesso");
 
             setMarcacaoSelecionada(null);
             await buscar();
@@ -121,10 +139,18 @@ function MarcacoesDesconsideradas() {
               err?.response?.data?.message ||
               err?.response?.data ||
               "Erro ao reconsiderar";
-            alert(msg);
+
+            showAlert("error", String(msg));
           }
         }}
         modo="reconsiderar"
+      />
+
+      <Alert
+        open={alerta.open}
+        type={alerta.type}
+        message={alerta.message}
+        onClose={() => setAlerta((a) => ({ ...a, open: false }))}
       />
     </div>
   );

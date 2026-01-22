@@ -1,15 +1,29 @@
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { PlusIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import { useEffect, useState } from "react";
 import DadosMarcacao from "../../components/DadosMarcacao";
 import TabelaHistorico from "../../components/TabelaHistorico";
+import Alert from "../../components/Alert";
 
 function HistoricoPonto() {
   const navigate = useNavigate();
+
   const [linhas, setLinhas] = useState([]);
+  const [resultadoCalculo, setResultadoCalculo] = useState({}); // { "2026-01-18": "4h 41m" }
+  const [calculado, setCalculado] = useState(false);
+  const [resultadoIntervalo, setResultadoIntervalo] = useState({});
   const [marcacaoSelecionada, setMarcacaoSelecionada] = useState(null);
+
+  const [alerta, setAlerta] = useState({
+    open: false,
+    type: "success",
+    message: "",
+  });
+
+  const showAlert = (type, message) => {
+    setAlerta({ open: true, type, message });
+  };
 
   const buscar = async () => {
     const inicio = "2026-01-01";
@@ -17,10 +31,10 @@ function HistoricoPonto() {
 
     const res = await api.get("/pontos/historico", { params: { inicio, fim } });
     setLinhas(res.data);
+
+    setResultadoCalculo({});
     setCalculado(false);
   };
-
-  const [calculado, setCalculado] = useState(false);
 
   const calcular = async () => {
     const inicio = "2026-01-01";
@@ -29,20 +43,23 @@ function HistoricoPonto() {
     const res = await api.get("/pontos/historico/calcular", {
       params: { inicio, fim },
     });
-    setLinhas(res.data);
+
+    const mapaTrabalhadas = {};
+    const mapaIntervalo = {};
+
+    for (const dia of res.data) {
+      mapaTrabalhadas[dia.data] = dia.horasTrabalhadas;
+      mapaIntervalo[dia.data] = dia.intervalo;
+    }
+
+    setResultadoCalculo(mapaTrabalhadas);
+    setResultadoIntervalo(mapaIntervalo);
     setCalculado(true);
-  };
-
-  const formatarDataBR = (dataISO) => {
-    if (!dataISO) return "";
-
-    const [ano, mes, dia] = dataISO.split("-");
-    return `${dia}/${mes}/${ano}`;
   };
 
   const desconsiderarMarcacao = async () => {
     if (!marcacaoSelecionada?.id) {
-      alert("Essa marcação não pode ser desconsiderada.");
+      showAlert("error", "Essa marcação não pode ser desconsiderada.");
       return;
     }
 
@@ -51,13 +68,23 @@ function HistoricoPonto() {
         motivo: "ADMIN",
       });
 
-      alert("Marcação desconsiderada!");
+      showAlert("success", "Marcação desconsiderada!");
       setMarcacaoSelecionada(null);
+
       await buscar();
     } catch (err) {
-      alert("Falhou ao desconsiderar a marcação.");
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data ||
+        "Falhou ao desconsiderar a marcação.";
+
+      showAlert("error", msg);
     }
   };
+
+  useEffect(() => {
+    buscar();
+  }, []);
 
   return (
     <div className="w-full ml-20 mt-10">
@@ -70,7 +97,7 @@ function HistoricoPonto() {
       </h2>
 
       {/* CARD */}
-      <div className="bg-white rounded-2xl shadow-md p-6  w-[90%]">
+      <div className="bg-white rounded-2xl shadow-md p-6 w-[90%]">
         {/* FILTROS */}
         <div className="flex gap-6 w-full items-end justify-end mb-6">
           {/* CAMPO 1 */}
@@ -103,53 +130,57 @@ function HistoricoPonto() {
               type="button"
               onClick={calcular}
               className="w-[180px] h-9 shadow rounded border border-[#3379BC]
-      text-[#3379BC] font-semibold text-[18px]
-      flex items-center justify-center gap-2
-      hover:bg-[#3379BC] hover:text-white transition cursor-pointer"
+                text-[#3379BC] font-semibold text-[18px]
+                flex items-center justify-center gap-2
+                hover:bg-[#3379BC] hover:text-white transition cursor-pointer"
             >
               <PlusIcon className="h-6 w-6" />
-              Calcular
+              {calculado ? "Recalcular" : "Calcular"}
             </button>
 
             {/* Tooltip */}
             <div
               className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2
-      hidden group-hover:block
-      bg-gray-400 text-white text-sm px-3 py-2 rounded-md
-      whitespace-nowrap z-50"
+                hidden group-hover:block
+                bg-gray-400 text-white text-sm px-3 py-2 rounded-md
+                whitespace-nowrap z-50"
             >
               Para o cálculo ser correto, é necessário ter um número <b>par</b>{" "}
               de marcações.
             </div>
           </div>
 
-          <div className="flex gap-4">
-            <button
-              type="button"
-              onClick={buscar}
-              className="bg-[#3379BC] w-[180px] h-9 shadow rounded
-    text-white font-semibold text-[18px] flex items-center justify-center gap-2 hover:bg-[#40A5DD] cursor-pointer"
-            >
-              <MagnifyingGlassIcon className="h-6 w-6 stroke-2" />
-              Pesquisar
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={buscar}
+            className="bg-[#3379BC] w-[180px] h-9 shadow rounded
+              text-white font-semibold text-[18px]
+              flex items-center justify-center gap-2
+              hover:bg-[#40A5DD] cursor-pointer"
+          >
+            <MagnifyingGlassIcon className="h-6 w-6 stroke-2" />
+            Pesquisar
+          </button>
         </div>
 
         {/* TABELA */}
         <TabelaHistorico
           linhas={linhas}
-          onSelectMarcacao={(m) =>
+          calculado={calculado}
+          resultadoCalculo={resultadoCalculo}
+          resultadoIntervalo={resultadoIntervalo}
+          onSelectMarcacao={(m) => {
             setMarcacaoSelecionada({
               id: m.id,
               momento: m.momento,
               foto: m.fotoBase,
               localizacao: { latitude: m.latitude, longitude: m.longitude },
               motivo: m.motivo,
-            })
-          }
+            });
+          }}
         />
       </div>
+
       <DadosMarcacao
         foto={marcacaoSelecionada?.foto}
         momento={marcacaoSelecionada?.momento}
@@ -157,6 +188,13 @@ function HistoricoPonto() {
         onFechar={() => setMarcacaoSelecionada(null)}
         onDesconsiderar={desconsiderarMarcacao}
         modo="desconsiderar"
+      />
+
+      <Alert
+        open={alerta.open}
+        type={alerta.type}
+        message={alerta.message}
+        onClose={() => setAlerta((a) => ({ ...a, open: false }))}
       />
     </div>
   );
