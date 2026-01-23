@@ -23,3 +23,16 @@
   animation-timing-function: linear;
   animation-fill-mode: forwards;
 }
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  display: block;
+  position: absolute;
+  right: 0;
+  width: 2.25rem;
+  height: 100%;
+  cursor: pointer;
+}
+
+input[type="date"]::-webkit-datetime-edit {
+  padding: 0;
+}

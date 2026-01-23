@@ -1,17 +1,39 @@
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import { useEffect, useState } from "react";
 import DadosMarcacao from "../../components/DadosMarcacao";
 import TabelaHistorico from "../../components/TabelaHistorico";
 import Alert from "../../components/Alert";
+import DateInput from "../../components/DateInput";
 
 function HistoricoPonto() {
-  const navigate = useNavigate();
+  // PESQUISA INICIAL ULTIMOS 10 DIAS
+  const pad = (n) => String(n).padStart(2, "0");
+  const toISO = (d) =>
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+  const hoje = new Date();
+  const dezDiasAtras = new Date();
+  dezDiasAtras.setDate(hoje.getDate() - 4);
+
+  const dataInicialPadrao = toISO(dezDiasAtras);
+  const dataFinalPadrao = toISO(hoje);
+
+  const [dataInicial, setDataInicial] = useState(dataInicialPadrao);
+  const [dataFinal, setDataFinal] = useState(dataFinalPadrao);
 
   const [linhas, setLinhas] = useState([]);
   const [marcacaoSelecionada, setMarcacaoSelecionada] = useState(null);
 
+  const buscar = async () => {
+    const inicio = dataInicial;
+    const fim = dataFinal;
+
+    const res = await api.get("/pontos/historico", { params: { inicio, fim } });
+    setLinhas(res.data);
+  };
+
+  // ALERTA
   const [alerta, setAlerta] = useState({
     open: false,
     type: "success",
@@ -20,14 +42,6 @@ function HistoricoPonto() {
 
   const showAlert = (type, message) => {
     setAlerta({ open: true, type, message });
-  };
-
-  const buscar = async () => {
-    const inicio = "2026-01-01";
-    const fim = "2026-01-31";
-
-    const res = await api.get("/pontos/historico", { params: { inicio, fim } });
-    setLinhas(res.data);
   };
 
   const desconsiderarMarcacao = async () => {
@@ -74,28 +88,24 @@ function HistoricoPonto() {
         {/* FILTROS */}
         <div className="flex gap-6 w-full items-end justify-end mb-6">
           {/* CAMPO 1 */}
-          <div className="flex flex-col w-[180px]">
-            <label className="text-[#3379BC] font-semibold">
-              Data Inicial <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              className="bg-white border border-gray-300 rounded p-1.5 w-full placeholder-gray-400 placeholder:font-semibold"
-              placeholder="00/00/0000"
-            />
-          </div>
+          <DateInput
+            label="Data Inicial"
+            required
+            widthClass="w-[180px]"
+            name="inicio"
+            value={dataInicial}
+            onChange={(e) => setDataInicial(e.target.value)}
+          />
 
           {/* CAMPO 2 */}
-          <div className="flex flex-col w-[180px]">
-            <label className="text-[#3379BC] font-semibold">
-              Data Final <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              className="bg-white border border-gray-300 rounded p-1.5 w-full placeholder-gray-400 placeholder:font-semibold"
-              placeholder="00/00/0000"
-            />
-          </div>
+          <DateInput
+            label="Data Final"
+            required
+            widthClass="w-[180px]"
+            name="fim"
+            value={dataFinal}
+            onChange={(e) => setDataFinal(e.target.value)}
+          />
 
           {/* BOTÃO */}
           <button

@@ -4,27 +4,30 @@ import api from "../../services/api";
 import DadosMarcacao from "../../components/DadosMarcacao";
 import TabelaMarcacoesDesconsideradas from "../../components/TabelaMarcacoesDesconsideradas";
 import Alert from "../../components/Alert";
+import DateInput from "../../components/DateInput";
 
 function MarcacoesDesconsideradas() {
   const [linhas, setLinhas] = useState([]);
   const [marcacaoSelecionada, setMarcacaoSelecionada] = useState(null);
 
-  const [dataInicial, setDataInicial] = useState("01/01/2026");
-  const [dataFinal, setDataFinal] = useState("31/01/2026");
+  // PESQUISA INICIAL ULTIMOS 10 DIAS
+  const pad = (n) => String(n).padStart(2, "0");
+  const toISO = (d) =>
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
-  const [alerta, setAlerta] = useState({
-    open: false,
-    type: "success",
-    message: "",
-  });
+  const hoje = new Date();
+  const dezDiasAtras = new Date();
+  dezDiasAtras.setDate(hoje.getDate() - 4);
 
-  const showAlert = (type, message) => {
-    setAlerta({ open: true, type, message });
-  };
+  const dataInicialPadrao = toISO(dezDiasAtras);
+  const dataFinalPadrao = toISO(hoje);
+
+  const [dataInicial, setDataInicial] = useState(dataInicialPadrao);
+  const [dataFinal, setDataFinal] = useState(dataFinalPadrao);
 
   const buscar = async () => {
-    const inicio = "2026-01-01";
-    const fim = "2026-01-31";
+    const inicio = dataInicial;
+    const fim = dataFinal;
 
     try {
       const res = await api.get("/pontos/desconsideradas", {
@@ -38,6 +41,17 @@ function MarcacoesDesconsideradas() {
         "Erro ao buscar marcações desconsideradas";
       showAlert("error", String(msg));
     }
+  };
+
+  // ALERTA
+  const [alerta, setAlerta] = useState({
+    open: false,
+    type: "success",
+    message: "",
+  });
+
+  const showAlert = (type, message) => {
+    setAlerta({ open: true, type, message });
   };
 
   useEffect(() => {
@@ -59,32 +73,24 @@ function MarcacoesDesconsideradas() {
         {/* FILTROS */}
         <div className="flex gap-6 w-full items-end justify-end mb-6">
           {/* CAMPO 1 */}
-          <div className="flex flex-col w-[150px]">
-            <label className="text-[#3379BC] font-semibold">
-              Data Inicial <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={dataInicial}
-              onChange={(e) => setDataInicial(e.target.value)}
-              className="bg-white border border-gray-300 rounded p-1.5 w-full placeholder-gray-400 placeholder:font-semibold"
-              placeholder="00/00/0000"
-            />
-          </div>
+          <DateInput
+            label="Data Inicial"
+            required
+            widthClass="w-[180px]"
+            name="inicio"
+            value={dataInicial}
+            onChange={(e) => setDataInicial(e.target.value)}
+          />
 
           {/* CAMPO 2 */}
-          <div className="flex flex-col w-[150px]">
-            <label className="text-[#3379BC] font-semibold">
-              Data Final <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={dataFinal}
-              onChange={(e) => setDataFinal(e.target.value)}
-              className="bg-white border border-gray-300 rounded p-1.5 w-full placeholder-gray-400 placeholder:font-semibold"
-              placeholder="00/00/0000"
-            />
-          </div>
+          <DateInput
+            label="Data Final"
+            required
+            widthClass="w-[180px]"
+            name="fim"
+            value={dataFinal}
+            onChange={(e) => setDataFinal(e.target.value)}
+          />
 
           {/* BOTÃO */}
           <div className="flex gap-4">
