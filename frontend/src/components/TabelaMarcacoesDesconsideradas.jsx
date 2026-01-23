@@ -44,8 +44,10 @@ function TabelaMarcacoesDesconsideradas({ linhas = [], onSelectMarcacao }) {
         <tbody>
           {linhas.map((linha) => (
             <tr key={linha.data} className="font-semibold">
-              <td className="py-3 p-2 border-t border-gray-300 text-center">
-                {formatarDataBR(linha.data)}
+              <td className="py-3 px-2 border-t border-gray-300 text-center">
+                <span className="text-lg font-medium text-gray-700">
+                  {formatarDataBR(linha.data)}
+                </span>
               </td>
 
               <td className="py-3 pl-6 border-t border-gray-300 border-l text-left">

@@ -1,8 +1,7 @@
 package com.dixi.dixibackend.controller;
 
 import com.dixi.dixibackend.dto.CriarPontoRequest;
-import com.dixi.dixibackend.dto.HistoricoPontoResponse;
-import com.dixi.dixibackend.dto.HistoricoPontoSimplesResponse;
+import com.dixi.dixibackend.dto.HistoricoMarcacoesResponse;
 import com.dixi.dixibackend.model.Ponto;
 import com.dixi.dixibackend.service.PontoService;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +29,7 @@ public class PontoController {
 
     // PESQUISAR
     @GetMapping("/historico")
-    public List<HistoricoPontoSimplesResponse> historicoSimples(
+    public List<HistoricoMarcacoesResponse> historicoSimples(
             @RequestParam String inicio,
             @RequestParam String fim
     ) {
@@ -40,18 +39,7 @@ public class PontoController {
         );
     }
 
-    // CALCULAR
-    @GetMapping("/historico/calcular")
-    public List<HistoricoPontoResponse> historicoCalculado(
-            @RequestParam String inicio,
-            @RequestParam String fim
-    ) {
-        return service.buscarHistorico(
-                LocalDate.parse(inicio),
-                LocalDate.parse(fim)
-        );
-    }
-    // DESCONSIDERADAS
+    // DESCONSIDERADAS PELO MINUTO
     @GetMapping("/desconsideradas")
     public List<HistoricoDesconsideradasResponse> desconsideradas(
             @RequestParam String inicio,

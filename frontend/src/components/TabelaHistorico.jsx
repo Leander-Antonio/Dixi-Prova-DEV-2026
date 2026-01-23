@@ -1,10 +1,4 @@
-function TabelaHistorico({
-  linhas = [],
-  calculado = false,
-  resultadoCalculo = {},
-  resultadoIntervalo = {},
-  onSelectMarcacao,
-}) {
+function TabelaHistorico({ linhas = [], onSelectMarcacao }) {
   const formatarDataBR = (dataISO) => {
     if (!dataISO) return "";
     const [ano, mes, dia] = String(dataISO).split("-");
@@ -27,17 +21,11 @@ function TabelaHistorico({
       <table className="w-full border-collapse">
         <thead>
           <tr className="bg-[#EBEDEE] text-[#3379BC] font-semibold text-[1.18rem]">
-            <th className="py-1.5 p-2 w-[90px] border-b border-gray-300">
+            <th className="py-1.5 p-2 w-[140px] border-b border-gray-300">
               Data
             </th>
-            <th className="py-1.5 p-2 w-[520px] border-b border-gray-300 border-l">
+            <th className="py-1.5 p-2 border-b border-gray-300 border-l">
               Marcações
-            </th>
-            <th className="py-1.5 p-2 w-[120px] border-b border-gray-300 border-l">
-              Trabalhadas
-            </th>
-            <th className="py-1.5 p-2 w-[120px] border-b border-gray-300 border-l">
-              Intervalo
             </th>
           </tr>
         </thead>
@@ -49,10 +37,13 @@ function TabelaHistorico({
             return (
               <tr key={data} className="font-semibold">
                 {/* DATA */}
-                <td className="py-3 p-2 border-t border-gray-300 text-center">
-                  {formatarDataBR(data)}
+                <td className="py-3 px-2 border-t border-gray-300 text-center">
+                  <span className="text-lg font-medium text-gray-700">
+                    {formatarDataBR(data)}
+                  </span>
                 </td>
 
+                {/* MARCAÇÕES */}
                 <td className="py-3 pl-6 border-t border-gray-300 border-l text-left">
                   <div className="flex flex-wrap gap-2">
                     {linha.marcacoes?.map((m, idx) => (
@@ -69,16 +60,6 @@ function TabelaHistorico({
                       </button>
                     ))}
                   </div>
-                </td>
-
-                {/* HORAS TRABALHADAS */}
-                <td className="py-3 p-2 border-t border-gray-300 border-l text-center">
-                  {calculado ? (resultadoCalculo[data] ?? "-") : "-"}
-                </td>
-
-                {/* INTERVALO */}
-                <td className="py-3 p-2 border-t border-gray-300 border-l text-center">
-                  {calculado ? (resultadoIntervalo[data] ?? "-") : "-"}
                 </td>
               </tr>
             );

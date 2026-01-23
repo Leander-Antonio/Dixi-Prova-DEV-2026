@@ -34,7 +34,7 @@ function MotivoDesconsideracao({ motivo }) {
       {/* TÍTULO */}
       <p className="text-lg font-bold text-gray-800">{info.titulo}</p>
 
-      {/* BADGE */}
+      {/* QUADRINHO */}
       <div className="flex justify-center mt-2">
         <span className="text-[11px] font-bold px-3 py-0.5 rounded-full border border-orange-600 text-orange-700 bg-orange-50">
           {info.badge}

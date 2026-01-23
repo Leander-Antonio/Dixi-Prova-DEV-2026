@@ -56,8 +56,8 @@ public class PontoService {
         return salvo;
     }
 
-    // HISTÓRICO CALCULADO (agora com intervalo também)
-    public List<HistoricoPontoResponse> buscarHistorico(LocalDate inicio, LocalDate fim) {
+// HISTÓRICO SIMPLES
+    public List<HistoricoMarcacoesResponse> buscarHistoricoSimples(LocalDate inicio, LocalDate fim) {
         LocalDateTime dataInicio = inicio.atStartOfDay();
         LocalDateTime dataFim = fim.atTime(LocalTime.MAX);
 
@@ -71,68 +71,11 @@ public class PontoService {
                         Collectors.toList()
                 ));
 
-        DateTimeFormatter formatoHora = DateTimeFormatter.ofPattern("HH:mm");
-        List<HistoricoPontoResponse> resposta = new ArrayList<>();
+        DateTimeFormatter formatoDataHora = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+        List<HistoricoMarcacoesResponse> resposta = new ArrayList<>();
 
         for (var entrada : agrupadoPorDia.entrySet()) {
-            List<Ponto> lista = entrada.getValue();
-
-            // lista de marcações no formato HH:mm
-            List<String> marcacoes = lista.stream()
-                    .map(p -> p.getMomento().toLocalTime().format(formatoHora))
-                    .toList();
-
-            long minutosTrabalhados = 0;
-            long minutosIntervalo = 0;
-
-            // trabalhado: (0-1), (2-3), ...
-            for (int i = 0; i + 1 < lista.size(); i += 2) {
-                minutosTrabalhados += Duration.between(
-                        lista.get(i).getMomento(),
-                        lista.get(i + 1).getMomento()
-                ).toMinutes();
-            }
-
-            // intervalo: (1-2), (3-4), ...
-            for (int i = 1; i + 1 < lista.size(); i += 2) {
-                minutosIntervalo += Duration.between(
-                        lista.get(i).getMomento(),
-                        lista.get(i + 1).getMomento()
-                ).toMinutes();
-            }
-
-            resposta.add(new HistoricoPontoResponse(
-                    entrada.getKey().toString(),
-                    marcacoes,
-                    formatarMinutos(minutosTrabalhados),
-                    formatarMinutos(minutosIntervalo)
-            ));
-        }
-
-        return resposta;
-    }
-
-    // HISTÓRICO SIMPLES
-    public List<HistoricoPontoSimplesResponse> buscarHistoricoSimples(LocalDate inicio, LocalDate fim) {
-        LocalDateTime dataInicio = inicio.atStartOfDay();
-        LocalDateTime dataFim = fim.atTime(LocalTime.MAX);
-
-        List<Ponto> pontos = repository
-                .findByDesconsideradaIsFalseAndMomentoBetweenOrderByMomentoAsc(dataInicio, dataFim);
-
-        Map<LocalDate, List<Ponto>> agrupadoPorDia =
-                pontos.stream().collect(Collectors.groupingBy(
-                        p -> p.getMomento().toLocalDate(),
-                        LinkedHashMap::new,
-                        Collectors.toList()
-                ));
-
-        List<HistoricoPontoSimplesResponse> resposta = new ArrayList<>();
-
-        for (var entrada : agrupadoPorDia.entrySet()) {
-            List<Ponto> lista = entrada.getValue();
-
-            List<MarcacaoResponse> marcacoes = lista.stream()
+            List<MarcacaoResponse> marcacoes = entrada.getValue().stream()
                     .map(p -> new MarcacaoResponse(
                             p.getId(),
                             p.getMomento(),
@@ -140,9 +83,10 @@ public class PontoService {
                             p.getLongitude(),
                             p.getFotoBase()
                     ))
+
                     .toList();
 
-            resposta.add(new HistoricoPontoSimplesResponse(
+            resposta.add(new HistoricoMarcacoesResponse(
                     entrada.getKey().toString(),
                     marcacoes
             ));
@@ -246,9 +190,5 @@ public class PontoService {
 
         p.setDesconsiderada(false);
         repository.save(p);
-    }
-
-    private String formatarMinutos(long minutos) {
-        return (minutos / 60) + "h " + (minutos % 60) + "m";
     }
 }

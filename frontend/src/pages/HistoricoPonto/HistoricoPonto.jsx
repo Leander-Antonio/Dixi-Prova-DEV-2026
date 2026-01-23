@@ -1,4 +1,4 @@
-import { MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import { useEffect, useState } from "react";
@@ -10,9 +10,6 @@ function HistoricoPonto() {
   const navigate = useNavigate();
 
   const [linhas, setLinhas] = useState([]);
-  const [resultadoCalculo, setResultadoCalculo] = useState({}); // { "2026-01-18": "4h 41m" }
-  const [calculado, setCalculado] = useState(false);
-  const [resultadoIntervalo, setResultadoIntervalo] = useState({});
   const [marcacaoSelecionada, setMarcacaoSelecionada] = useState(null);
 
   const [alerta, setAlerta] = useState({
@@ -31,30 +28,6 @@ function HistoricoPonto() {
 
     const res = await api.get("/pontos/historico", { params: { inicio, fim } });
     setLinhas(res.data);
-
-    setResultadoCalculo({});
-    setCalculado(false);
-  };
-
-  const calcular = async () => {
-    const inicio = "2026-01-01";
-    const fim = "2026-01-31";
-
-    const res = await api.get("/pontos/historico/calcular", {
-      params: { inicio, fim },
-    });
-
-    const mapaTrabalhadas = {};
-    const mapaIntervalo = {};
-
-    for (const dia of res.data) {
-      mapaTrabalhadas[dia.data] = dia.horasTrabalhadas;
-      mapaIntervalo[dia.data] = dia.intervalo;
-    }
-
-    setResultadoCalculo(mapaTrabalhadas);
-    setResultadoIntervalo(mapaIntervalo);
-    setCalculado(true);
   };
 
   const desconsiderarMarcacao = async () => {
@@ -101,7 +74,7 @@ function HistoricoPonto() {
         {/* FILTROS */}
         <div className="flex gap-6 w-full items-end justify-end mb-6">
           {/* CAMPO 1 */}
-          <div className="flex flex-col w-[150px]">
+          <div className="flex flex-col w-[180px]">
             <label className="text-[#3379BC] font-semibold">
               Data Inicial <span className="text-red-500">*</span>
             </label>
@@ -113,7 +86,7 @@ function HistoricoPonto() {
           </div>
 
           {/* CAMPO 2 */}
-          <div className="flex flex-col w-[150px]">
+          <div className="flex flex-col w-[180px]">
             <label className="text-[#3379BC] font-semibold">
               Data Final <span className="text-red-500">*</span>
             </label>
@@ -124,36 +97,11 @@ function HistoricoPonto() {
             />
           </div>
 
-          {/* BOTÕES */}
-          <div className="relative group">
-            <button
-              type="button"
-              onClick={calcular}
-              className="w-[180px] h-9 shadow rounded border border-[#3379BC]
-                text-[#3379BC] font-semibold text-[18px]
-                flex items-center justify-center gap-2
-                hover:bg-[#3379BC] hover:text-white transition cursor-pointer"
-            >
-              <PlusIcon className="h-6 w-6" />
-              {calculado ? "Recalcular" : "Calcular"}
-            </button>
-
-            {/* Tooltip */}
-            <div
-              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2
-                hidden group-hover:block
-                bg-gray-400 text-white text-sm px-3 py-2 rounded-md
-                whitespace-nowrap z-50"
-            >
-              Para o cálculo ser correto, é necessário ter um número <b>par</b>{" "}
-              de marcações.
-            </div>
-          </div>
-
+          {/* BOTÃO */}
           <button
             type="button"
             onClick={buscar}
-            className="bg-[#3379BC] w-[180px] h-9 shadow rounded
+            className="bg-[#3379BC] w-[220px] h-9 shadow rounded
               text-white font-semibold text-[18px]
               flex items-center justify-center gap-2
               hover:bg-[#40A5DD] cursor-pointer"
@@ -166,9 +114,6 @@ function HistoricoPonto() {
         {/* TABELA */}
         <TabelaHistorico
           linhas={linhas}
-          calculado={calculado}
-          resultadoCalculo={resultadoCalculo}
-          resultadoIntervalo={resultadoIntervalo}
           onSelectMarcacao={(m) => {
             setMarcacaoSelecionada({
               id: m.id,
