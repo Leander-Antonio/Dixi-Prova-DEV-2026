@@ -18,6 +18,7 @@ function TabelaMarcacoesDesconsideradas({ linhas = [], onSelectMarcacao }) {
     });
   };
 
+  // MOTIVO
   const motivoLabel = (motivo) => {
     const m = (motivo ?? "").toUpperCase();
 
@@ -26,6 +27,32 @@ function TabelaMarcacoesDesconsideradas({ linhas = [], onSelectMarcacao }) {
 
     return motivo ? "Outro" : "-";
   };
+
+  // VALIDA MARCAÇÕES EXISTENTES NO DIA
+  const toISODate = (d) => {
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  };
+
+  const linhasComDias = (() => {
+    if (!linhas || linhas.length === 0) return [];
+
+    const ordenadas = [...linhas].sort((a, b) =>
+      String(a.data).localeCompare(String(b.data)),
+    );
+
+    const porData = new Map(ordenadas.map((l) => [String(l.data), l]));
+
+    const inicio = new Date(`${ordenadas[0].data}T00:00:00`);
+    const fim = new Date(`${ordenadas[ordenadas.length - 1].data}T00:00:00`);
+
+    const result = [];
+    for (let d = new Date(inicio); d <= fim; d.setDate(d.getDate() + 1)) {
+      const dataISO = toISODate(d);
+      result.push(porData.get(dataISO) ?? { data: dataISO, marcacoes: [] });
+    }
+    return result;
+  })();
 
   return (
     <div className="overflow-auto rounded-2xl">
@@ -42,7 +69,7 @@ function TabelaMarcacoesDesconsideradas({ linhas = [], onSelectMarcacao }) {
         </thead>
 
         <tbody>
-          {linhas.map((linha) => (
+          {linhasComDias.map((linha) => (
             <tr key={linha.data} className="font-semibold">
               <td className="py-3 px-2 border-t border-gray-300 text-center">
                 <span className="text-lg font-medium text-gray-700">
@@ -51,25 +78,33 @@ function TabelaMarcacoesDesconsideradas({ linhas = [], onSelectMarcacao }) {
               </td>
 
               <td className="py-3 pl-6 border-t border-gray-300 border-l text-left">
-                <div className="flex flex-wrap gap-2">
-                  {linha.marcacoes?.map((m, idx) => (
-                    <button
-                      key={m?.id ?? idx}
-                      type="button"
-                      onClick={() => onSelectMarcacao?.(m)}
-                      className="min-w-[55px] py-1 rounded-lg border border-[#3379BC] text-[#3379BC] font-semibold
-hover:bg-[#3379BC] hover:text-white transition cursor-pointer text-center"
-                      title={motivoLabel(m?.motivo)}
-                    >
-                      {formatarHora(m?.momento)}
-                    </button>
-                  ))}
-                </div>
+                {linha.marcacoes && linha.marcacoes.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {linha.marcacoes.map((m, idx) => (
+                      <button
+                        key={m?.id ?? idx}
+                        type="button"
+                        onClick={() => onSelectMarcacao?.(m)}
+                        className="min-w-[55px] py-1 rounded-lg border border-[#3379BC]
+                          text-[#3379BC] font-semibold
+                          hover:bg-[#3379BC] hover:text-white transition
+                          cursor-pointer text-center"
+                        title={motivoLabel(m?.motivo)}
+                      >
+                        {formatarHora(m?.momento)}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="text-gray-400 ml-1">
+                    Nenhuma marcação desconsiderada no dia
+                  </span>
+                )}
               </td>
             </tr>
           ))}
 
-          {linhas.length === 0 && (
+          {linhasComDias.length === 0 && (
             <tr>
               <td
                 colSpan={2}
