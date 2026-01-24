@@ -171,22 +171,12 @@ public class PontoService {
         LocalDateTime fimMinuto = inicioMinuto.plusMinutes(1).minusNanos(1);
 
         boolean existeOutraValidaNoMesmoMinuto =
-                repository.existsByDesconsideradaIsFalseAndMomentoBetweenAndIdNot(
-                        inicioMinuto, fimMinuto, id
-                );
+                repository.existsByDesconsideradaIsFalseAndMomentoBetweenAndIdNot(inicioMinuto, fimMinuto, id);
 
         if (existeOutraValidaNoMesmoMinuto) {
             throw new RuntimeException("Marcação já existente");
         }
-
-        Desconsideracao d = p.getDesconsideracao();
-        if (d != null) {
-            p.setDesconsideracao(null);
-            d.setPonto(null);
-            desconsideracaoRepository.delete(d);
-        } else {
-            desconsideracaoRepository.findByPontoId(id).ifPresent(desconsideracaoRepository::delete);
-        }
+        p.setDesconsideracao(null);
 
         p.setDesconsiderada(false);
         repository.save(p);
