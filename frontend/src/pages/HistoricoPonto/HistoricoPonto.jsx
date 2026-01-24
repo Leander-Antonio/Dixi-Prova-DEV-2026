@@ -47,6 +47,18 @@ function HistoricoPonto() {
     setAlerta({ open: true, variant, message });
   };
 
+  const buscar = async () => {
+    const inicio = dataInicial;
+    const fim = dataFinal;
+
+    const res = await api.get("/pontos/historico", {
+      params: { inicio, fim },
+    });
+
+    setLinhas(res.data);
+    return res.data;
+  };
+
   const buscarComAlert = async () => {
     try {
       const dados = await buscar();
