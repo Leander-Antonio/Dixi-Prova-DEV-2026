@@ -35,15 +35,19 @@ public class PontoService {
         ponto.setLatitude(request.latitude);
         ponto.setLongitude(request.longitude);
 
+        // salva primeiro para ter ID
+        Ponto salvo = repository.save(ponto);
+
         LocalDateTime inicioMinuto = momento.truncatedTo(ChronoUnit.MINUTES);
         LocalDateTime fimMinuto = inicioMinuto.plusMinutes(1).minusNanos(1);
 
-        boolean jaExisteValidaNoMesmoMinuto =
-                repository.existsByDesconsideradaIsFalseAndMomentoBetween(inicioMinuto, fimMinuto);
+        // verifica se já existe OUTRA marcação válida no mesmo minuto
+        boolean jaExisteOutraValidaNoMesmoMinuto =
+                repository.existsByDesconsideradaIsFalseAndMomentoBetweenAndIdNot(
+                        inicioMinuto, fimMinuto, salvo.getId()
+                );
 
-        Ponto salvo = repository.save(ponto);
-
-        if (jaExisteValidaNoMesmoMinuto) {
+        if (jaExisteOutraValidaNoMesmoMinuto) {
             Desconsideracao d = new Desconsideracao();
             d.setPonto(salvo);
             d.setMotivo("MARCACAO_DUPLICADA");
@@ -56,7 +60,7 @@ public class PontoService {
         return salvo;
     }
 
-// HISTÓRICO SIMPLES
+    // HISTÓRICO SIMPLES (somente válidas)
     public List<HistoricoMarcacoesResponse> buscarHistoricoSimples(LocalDate inicio, LocalDate fim) {
         LocalDateTime dataInicio = inicio.atStartOfDay();
         LocalDateTime dataFim = fim.atTime(LocalTime.MAX);
@@ -71,7 +75,6 @@ public class PontoService {
                         Collectors.toList()
                 ));
 
-        DateTimeFormatter formatoDataHora = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         List<HistoricoMarcacoesResponse> resposta = new ArrayList<>();
 
         for (var entrada : agrupadoPorDia.entrySet()) {
@@ -83,7 +86,6 @@ public class PontoService {
                             p.getLongitude(),
                             p.getFotoBase()
                     ))
-
                     .toList();
 
             resposta.add(new HistoricoMarcacoesResponse(
@@ -95,13 +97,13 @@ public class PontoService {
         return resposta;
     }
 
-    // DESCONSIDERADAS busca o motivo na tabela
+    // DESCONSIDERADAS (busca motivo no repository)
     public List<HistoricoDesconsideradasResponse> buscarDesconsideradas(LocalDate inicio, LocalDate fim) {
         LocalDateTime dataInicio = inicio.atStartOfDay();
         LocalDateTime dataFim = fim.atTime(LocalTime.MAX);
 
-        List<Ponto> pontos = repository
-                .findByDesconsideradaIsTrueAndMomentoBetweenOrderByMomentoAsc(dataInicio, dataFim);
+        // aqui troca o método removido
+        List<Ponto> pontos = repository.findDesconsideradasComMotivo(dataInicio, dataFim);
 
         Map<LocalDate, List<Ponto>> agrupadoPorDia =
                 pontos.stream().collect(Collectors.groupingBy(
@@ -114,13 +116,11 @@ public class PontoService {
         List<HistoricoDesconsideradasResponse> resposta = new ArrayList<>();
 
         for (var entrada : agrupadoPorDia.entrySet()) {
-            List<Ponto> lista = entrada.getValue();
-
-            List<MarcacaoDesconsideradaResponse> marcacoes = lista.stream()
+            List<MarcacaoDesconsideradaResponse> marcacoes = entrada.getValue().stream()
                     .map(p -> {
-                        String mot = desconsideracaoRepository.findByPontoId(p.getId())
-                                .map(Desconsideracao::getMotivo)
-                                .orElse(null);
+                        String mot = (p.getDesconsideracao() != null)
+                                ? p.getDesconsideracao().getMotivo()
+                                : null;
 
                         return new MarcacaoDesconsideradaResponse(
                                 p.getId(),
@@ -171,10 +171,18 @@ public class PontoService {
         LocalDateTime fimMinuto = inicioMinuto.plusMinutes(1).minusNanos(1);
 
         boolean existeOutraValidaNoMesmoMinuto =
-                repository.existsByDesconsideradaIsFalseAndMomentoBetweenAndIdNot(inicioMinuto, fimMinuto, id);
+                repository.existsByDesconsideradaIsFalseAndMomentoBetweenAndIdNot(
+                        inicioMinuto, fimMinuto, id
+                );
 
         if (existeOutraValidaNoMesmoMinuto) {
             throw new RuntimeException("Marcação já existente");
+        }
+
+        // quebra vínculo para orphanRemoval funcionar bem
+        Desconsideracao d = p.getDesconsideracao();
+        if (d != null) {
+            d.setPonto(null);
         }
         p.setDesconsideracao(null);
 

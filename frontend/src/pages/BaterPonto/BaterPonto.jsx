@@ -49,7 +49,7 @@ function BaterPonto() {
             },
           }),
         (err) => {
-          const denied = err?.code === 1; // PERMISSION_DENIED
+          const denied = err?.code === 1;
           resolve({ ok: false, denied, loc: null });
         },
         { enableHighAccuracy: true, timeout: 8000 },

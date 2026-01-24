@@ -15,7 +15,7 @@ public class Desconsideracao {
     private Ponto ponto;
 
     @Column(nullable = false)
-    private String motivo; // "DUPLICADA" ou "ADMIN"
+    private String motivo;
 
     private String observacao;
 
