@@ -129,3 +129,20 @@ DIXI-PROVA-DEV-2026
 ├── README.md                   # Documentação do projeto
 └── .gitignore                  # Arquivos ignorados pelo Git
 ```
+
+## ❌ Funcionalidades consideradas e não implementadas
+
+Durante o desenvolvimento, algumas funcionalidades foram consideradas, mas optou-se por não
+implementá-las na versão final do projeto, com base em decisões técnicas e de escopo.
+
+- **Local de trabalho fixo por funcionário**  
+  Foi considerada a validação de marcações com base em um local de trabalho pré-definido.
+  No entanto, devido à **imprecisão da localização obtida via navegador**, especialmente em
+  ambientes desktop, a funcionalidade foi descartada para evitar validações incorretas.
+
+- **Cálculo de horas trabalhadas e intervalo**  
+  Foi implementada inicialmente uma funcionalidade de cálculo de horas trabalhadas e tempo
+  de intervalo. Contudo, o resultado não se mostrou confiável diante dos diferentes cenários
+  de marcação (marcações desconsideradas e duplicadas).  
+  Como o foco principal do desafio era a **correta gestão das marcações de ponto**, essa
+  funcionalidade foi removida para manter consistência e clareza nas regras de negócio.
