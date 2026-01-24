@@ -25,23 +25,44 @@ function HistoricoPonto() {
   const [linhas, setLinhas] = useState([]);
   const [marcacaoSelecionada, setMarcacaoSelecionada] = useState(null);
 
-  const buscar = async () => {
-    const inicio = dataInicial;
-    const fim = dataFinal;
-
-    const res = await api.get("/pontos/historico", { params: { inicio, fim } });
-    setLinhas(res.data);
-  };
-
   // ALERTA
   const [alerta, setAlerta] = useState({
     open: false,
-    type: "success",
+    variant: "success",
     message: "",
   });
 
-  const showAlert = (type, message) => {
-    setAlerta({ open: true, type, message });
+  const showAlert = (variant, message) => {
+    const texto = String(message || "").toLowerCase();
+
+    if (texto.includes("marcação já existente")) {
+      setAlerta({
+        open: true,
+        variant: "error",
+        message: message,
+      });
+      return;
+    }
+
+    setAlerta({ open: true, variant, message });
+  };
+
+  const buscarComAlert = async () => {
+    try {
+      const dados = await buscar();
+
+      if (!dados || dados.length === 0) {
+        showAlert("success", "Nenhuma marcação encontrada no período");
+      } else {
+        showAlert("success", "Pesquisa concluída com sucesso");
+      }
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data ||
+        "Erro ao buscar histórico de ponto";
+      showAlert("error", String(msg));
+    }
   };
 
   const desconsiderarMarcacao = async () => {
@@ -65,12 +86,23 @@ function HistoricoPonto() {
         err?.response?.data ||
         "Falhou ao desconsiderar a marcação.";
 
-      showAlert("error", msg);
+      showAlert("error", String(msg));
     }
   };
 
   useEffect(() => {
-    buscar();
+    // primeiro carregamento sem alert
+    (async () => {
+      try {
+        await buscar();
+      } catch (err) {
+        const msg =
+          err?.response?.data?.message ||
+          err?.response?.data ||
+          "Erro ao buscar histórico de ponto";
+        showAlert("error", String(msg));
+      }
+    })();
   }, []);
 
   return (
@@ -87,7 +119,6 @@ function HistoricoPonto() {
       <div className="bg-white rounded-2xl shadow-md p-6 w-[90%]">
         {/* FILTROS */}
         <div className="flex gap-6 w-full items-end justify-end mb-6">
-          {/* CAMPO 1 */}
           <DateInput
             label="Data Inicial"
             required
@@ -97,7 +128,6 @@ function HistoricoPonto() {
             onChange={(e) => setDataInicial(e.target.value)}
           />
 
-          {/* CAMPO 2 */}
           <DateInput
             label="Data Final"
             required
@@ -107,14 +137,13 @@ function HistoricoPonto() {
             onChange={(e) => setDataFinal(e.target.value)}
           />
 
-          {/* BOTÃO */}
           <button
             type="button"
-            onClick={buscar}
+            onClick={buscarComAlert}
             className="bg-[#3379BC] w-[220px] h-9 shadow rounded
-              text-white font-semibold text-[18px]
-              flex items-center justify-center gap-2
-              hover:bg-[#40A5DD] cursor-pointer"
+    text-white font-semibold text-[18px]
+    flex items-center justify-center gap-2
+    hover:bg-[#40A5DD] cursor-pointer"
           >
             <MagnifyingGlassIcon className="h-6 w-6 stroke-2" />
             Pesquisar
@@ -147,7 +176,7 @@ function HistoricoPonto() {
 
       <Alert
         open={alerta.open}
-        type={alerta.type}
+        variant={alerta.variant}
         message={alerta.message}
         onClose={() => setAlerta((a) => ({ ...a, open: false }))}
       />

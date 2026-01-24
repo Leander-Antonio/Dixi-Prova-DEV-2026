@@ -34,24 +34,37 @@ function MarcacoesDesconsideradas() {
         params: { inicio, fim },
       });
       setLinhas(res.data);
+      return res.data;
     } catch (err) {
       const msg =
         err?.response?.data?.message ||
         err?.response?.data ||
         "Erro ao buscar marcações desconsideradas";
       showAlert("error", String(msg));
+      return null;
+    }
+  };
+
+  const buscarComAlert = async () => {
+    const dados = await buscar();
+    if (!dados) return;
+
+    if (dados.length === 0) {
+      showAlert("success", "Nenhuma marcação encontrada no período");
+    } else {
+      showAlert("success", "Pesquisa concluída com sucesso");
     }
   };
 
   // ALERTA
   const [alerta, setAlerta] = useState({
     open: false,
-    type: "success",
+    variant: "success",
     message: "",
   });
 
-  const showAlert = (type, message) => {
-    setAlerta({ open: true, type, message });
+  const showAlert = (variant, message) => {
+    setAlerta({ open: true, variant, message });
   };
 
   useEffect(() => {
@@ -96,11 +109,11 @@ function MarcacoesDesconsideradas() {
           <div className="flex gap-4">
             <button
               type="button"
-              onClick={buscar}
+              onClick={buscarComAlert}
               className="bg-[#3379BC] w-[180px] h-9 shadow rounded
-                text-white font-semibold text-[18px]
-                flex items-center justify-center gap-2
-                hover:bg-[#40A5DD] cursor-pointer"
+    text-white font-semibold text-[18px]
+    flex items-center justify-center gap-2
+    hover:bg-[#40A5DD] cursor-pointer"
             >
               <MagnifyingGlassIcon className="h-6 w-6 stroke-2" />
               Pesquisar
@@ -154,7 +167,7 @@ function MarcacoesDesconsideradas() {
 
       <Alert
         open={alerta.open}
-        type={alerta.type}
+        variant={alerta.variant}
         message={alerta.message}
         onClose={() => setAlerta((a) => ({ ...a, open: false }))}
       />
