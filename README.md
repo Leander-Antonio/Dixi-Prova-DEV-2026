@@ -48,6 +48,101 @@ e a visualização dos registros ignorados pelo sistema.
 Exibe os detalhes de uma marcação desconsiderada, informando o motivo da desconsideração
 e permitindo a reconsideração da marcação, quando disponível.
 
+
+
+## 🛠️ Tecnologias utilizadas
+
+### Backend
+
+- **Java**
+- **Spring Boot** — construção da API e aplicação das regras de negócio
+- **Maven** — gerenciamento de dependências e build
+- **MySQL** — persistência dos dados
+- **Docker / Docker Compose** — configuração e execução dos serviços de infraestrutura
+
+### Frontend
+
+- **JavaScript**
+- **React** — construção da interface do usuário
+- **Vite** — ambiente de desenvolvimento e build
+- **Tailwind CSS** — estilização da interface
+- **HTML5 e CSS3**
+
+### Outros
+
+- **OpenStreetMap** — visualização de localização geográfica no mapa
+- **Git** — versionamento de código
+
+## ▶️ Como rodar o projeto
+
+### 🔧 Pré-requisitos
+
+- **Git**
+- **Java JDK 17 ou superior**
+- **Maven**
+- **Node.js 18 ou superior**
+- **Docker e Docker Compose**
+
+### 🚀 Passo a passo
+
+#### 1️⃣ Clonar o repositório
+
+```bash
+git clone https://github.com/Leander-Antonio/Dixi-Prova-DEV-2026
+cd Dixi-Prova-DEV-2026
+```
+2️⃣ Subir o banco de dados
+```bash
+
+cd backend/dixiBackend
+docker-compose up -d
+```
+3️⃣ Executar o backend
+```bash
+
+mvn spring-boot:run
+```
+Backend disponível em: http://localhost:8080
+
+4️⃣ Executar o frontend
+Abra outro terminal, volte para a raiz do projeto e execute:
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Frontend disponível em: http://localhost:5173
+
+---
+## 📂 Estrutura do projeto
+
+```text
+DIXI-PROVA-DEV-2026
+├── backend/
+│   └── dixiBackend/
+│       ├── src/                # Código-fonte da aplicação backend
+│       ├── .mvn/               # Configurações do Maven Wrapper
+│       ├── target/             # Arquivos gerados no build
+│       ├── docker-compose.yml  # Orquestração dos serviços (ex.: banco de dados)
+│       ├── pom.xml             # Gerenciamento de dependências e build
+│       ├── mvnw / mvnw.cmd     # Maven Wrapper
+│       └── HELP.md             # Instruções auxiliares do backend
+│
+├── frontend/
+│   ├── docs/                   # Imagens e assets usados no README
+│   ├── public/                 # Arquivos públicos do frontend
+│   ├── src/                    # Código-fonte da aplicação frontend
+│   ├── index.html              # Entry point da aplicação
+│   ├── package.json            # Dependências e scripts do frontend
+│   ├── vite.config.js          # Configuração do Vite
+│   ├── tailwind.config.js      # Configuração do Tailwind CSS
+│   └── postcss.config.js       # Configuração do PostCSS
+│
+├── README.md                   # Documentação do projeto
+└── .gitignore                  # Arquivos ignorados pelo Git
+```
+
+
 ## ✅ Testes realizados
 
 Durante o desenvolvimento, foram realizados **testes manuais** contemplando cenários comuns e casos de borda.
@@ -79,56 +174,6 @@ Durante o desenvolvimento, foram realizados **testes manuais** contemplando cen�
   - Latitude: `-90` e `90`
   - Longitude: `-180` e `180`
 
-## 🛠️ Tecnologias utilizadas
-
-### Backend
-
-- **Java**
-- **Spring Boot** — construção da API e aplicação das regras de negócio
-- **Maven** — gerenciamento de dependências e build
-- **MySQL** — persistência dos dados
-- **Docker / Docker Compose** — configuração e execução dos serviços de infraestrutura
-
-### Frontend
-
-- **JavaScript**
-- **React** — construção da interface do usuário
-- **Vite** — ambiente de desenvolvimento e build
-- **Tailwind CSS** — estilização da interface
-- **HTML5 e CSS3**
-
-### Outros
-
-- **OpenStreetMap** — visualização de localização geográfica no mapa
-- **Git** — versionamento de código
-
-## 📂 Estrutura do projeto
-
-```text
-DIXI-PROVA-DEV-2026
-├── backend/
-│   └── dixiBackend/
-│       ├── src/                # Código-fonte da aplicação backend
-│       ├── .mvn/               # Configurações do Maven Wrapper
-│       ├── target/             # Arquivos gerados no build
-│       ├── docker-compose.yml  # Orquestração dos serviços (ex.: banco de dados)
-│       ├── pom.xml             # Gerenciamento de dependências e build
-│       ├── mvnw / mvnw.cmd     # Maven Wrapper
-│       └── HELP.md             # Instruções auxiliares do backend
-│
-├── frontend/
-│   ├── docs/                   # Imagens e assets usados no README
-│   ├── public/                 # Arquivos públicos do frontend
-│   ├── src/                    # Código-fonte da aplicação frontend
-│   ├── index.html              # Entry point da aplicação
-│   ├── package.json            # Dependências e scripts do frontend
-│   ├── vite.config.js          # Configuração do Vite
-│   ├── tailwind.config.js      # Configuração do Tailwind CSS
-│   └── postcss.config.js       # Configuração do PostCSS
-│
-├── README.md                   # Documentação do projeto
-└── .gitignore                  # Arquivos ignorados pelo Git
-```
 
 ## ❌ Funcionalidades consideradas e não implementadas
 
@@ -146,3 +191,9 @@ implementá-las na versão final do projeto, com base em decisões técnicas e d
   de marcação (marcações desconsideradas e duplicadas).  
   Como o foco principal do desafio era a **correta gestão das marcações de ponto**, essa
   funcionalidade foi removida para manter consistência e clareza nas regras de negócio.
+
+  ## 👤 Autor
+
+-Desenvolvido por **Leander Antonio**  
+-Desafio técnico **Prova DEV 2026**
+
